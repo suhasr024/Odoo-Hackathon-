@@ -16,7 +16,7 @@ export const EmployeeLayout = () => {
       />
 
       {/* Main Workspace Canvas */}
-      <div className="flex-1 ml-0 md:ml-[280px] w-full max-w-full md:max-w-[calc(100%-280px)] flex flex-col min-h-screen">
+      <div className="flex-1 min-w-0 ml-0 md:ml-[280px] w-full max-w-full md:max-w-[calc(100%-280px)] flex flex-col min-h-screen">
         <Header onMobileMenuToggle={() => setIsMobileMenuOpen(prev => !prev)} />
         <main className="flex-1 p-4 sm:p-6 md:p-8 overflow-y-auto">
           <Outlet />
