@@ -9,8 +9,8 @@ export const LoginPage = () => {
   const { success } = useToast();
   const navigate = useNavigate();
 
-  const [email, setEmail] = useState('alex.morgan@vantage.io');
-  const [password, setPassword] = useState('DemoPassword123!');
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
