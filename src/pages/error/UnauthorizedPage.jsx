@@ -1,10 +1,16 @@
-import React from 'react';
+import React, { useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
+import { useToast } from '../../hooks/useToast';
 
 export const UnauthorizedPage = () => {
   const navigate = useNavigate();
   const { user } = useAuth();
+  const { error } = useToast();
+
+  useEffect(() => {
+    error("You don't have permission to access that page.");
+  }, [error]);
 
   const handleReturn = () => {
     if (user?.role === 'Admin') {

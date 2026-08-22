@@ -1,36 +1,31 @@
 /**
- * Reusable Leave Duration Calculator
- * Rule: Inclusive calendar days by default ((endDate - startDate) + 1).
- * Extensible for future weekend/holiday exclusions.
+ * Reusable Working Days & Leave Duration Calculator
+ * Rule: Standard HRMS policy excluding weekends (Saturday & Sunday).
+ * Single shared source of truth for both calculateLeaveDuration and markLeaveAttendance.
  */
-export const calculateLeaveDuration = (startDateStr, endDateStr, options = {}) => {
-  if (!startDateStr || !endDateStr) return 0;
 
-  const start = new Date(startDateStr);
-  const end = new Date(endDateStr);
+export const getWorkingDatesInRange = (startDateStr, endDateStr) => {
+  if (!startDateStr || !endDateStr) return [];
 
-  if (isNaN(start.getTime()) || isNaN(end.getTime())) return 0;
-  if (end < start) return 0;
+  const start = new Date(startDateStr + 'T00:00:00Z');
+  const end = new Date(endDateStr + 'T00:00:00Z');
 
-  // Calculate inclusive calendar days (normalized to UTC dates)
-  const utcStart = Date.UTC(start.getFullYear(), start.getMonth(), start.getDate());
-  const utcEnd = Date.UTC(end.getFullYear(), end.getMonth(), end.getDate());
+  if (isNaN(start.getTime()) || isNaN(end.getTime()) || end < start) return [];
 
-  const msPerDay = 1000 * 60 * 60 * 24;
-  let totalDays = Math.floor((utcEnd - utcStart) / msPerDay) + 1;
+  const dates = [];
+  let current = new Date(start);
 
-  if (options.excludeWeekends) {
-    let workingDays = 0;
-    let current = new Date(start);
-    while (current <= end) {
-      const day = current.getDay();
-      if (day !== 0 && day !== 6) {
-        workingDays++;
-      }
-      current.setDate(current.getDate() + 1);
+  while (current <= end) {
+    const dayOfWeek = current.getUTCDay(); // 0 = Sunday, 6 = Saturday
+    if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+      dates.push(current.toISOString().split('T')[0]);
     }
-    totalDays = workingDays;
+    current.setUTCDate(current.getUTCDate() + 1);
   }
 
-  return Math.max(0, totalDays);
+  return dates;
+};
+
+export const calculateLeaveDuration = (startDateStr, endDateStr) => {
+  return getWorkingDatesInRange(startDateStr, endDateStr).length;
 };

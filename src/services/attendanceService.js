@@ -1,6 +1,7 @@
 import { storageAdapter } from './storage/storageAdapter';
 import { generateInitialAttendance, INITIAL_USERS } from '../data/mockData';
 import { evaluateAttendanceStatus } from '../config/attendanceRules';
+import { getWorkingDatesInRange } from '../utils/durationCalculator';
 
 const ATTENDANCE_HISTORY_KEY = 'attendance_records_';
 const TODAY_SESSION_KEY = 'attendance_today_session_';
@@ -160,25 +161,38 @@ export const attendanceService = {
   },
 
   /**
-   * Upsert attendance records with status 'On Leave' for an approved leave date range.
-   * Skips weekend days (Saturday & Sunday) per working-day policy.
+   * Upsert attendance records for an approved leave date range using shared getWorkingDatesInRange.
+   * Guard: If employee already has real checkIn data for a date, preserves checkIn/checkOut and sets status to 'Half Day' (partial attendance).
+   * Does NOT erase existing timestamps under any circumstance.
    */
   async markLeaveAttendance(userId, startDateStr, endDateStr, leaveTypeName = 'Leave') {
     const historyKey = `${ATTENDANCE_HISTORY_KEY}${userId}`;
     const history = await this.initUserAttendance(userId);
 
-    const start = new Date(startDateStr + 'T00:00:00Z');
-    const end = new Date(endDateStr + 'T00:00:00Z');
+    const workingDates = getWorkingDatesInRange(startDateStr, endDateStr);
 
-    let current = new Date(start);
-    while (current <= end) {
-      const dayOfWeek = current.getUTCDay(); // 0 = Sunday, 6 = Saturday
-      const dateStr = current.toISOString().split('T')[0];
+    for (const dateStr of workingDates) {
+      const existingIndex = history.findIndex(r => r.date === dateStr);
 
-      // Mark only working days (Monday - Friday)
-      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
-        const existingIndex = history.findIndex(r => r.date === dateStr);
-        const leaveRecord = {
+      if (existingIndex >= 0) {
+        const existing = history[existingIndex];
+        // Guard check: If employee already logged checkIn, preserve timestamps and mark as 'Half Day'
+        if (existing.checkIn) {
+          history[existingIndex] = {
+            ...existing,
+            status: 'Half Day'
+          };
+        } else {
+          history[existingIndex] = {
+            ...existing,
+            checkIn: null,
+            checkOut: null,
+            totalHours: '0h 0m',
+            status: 'On Leave'
+          };
+        }
+      } else {
+        history.push({
           id: `att_${dateStr}_${userId}`,
           userId,
           date: dateStr,
@@ -186,16 +200,8 @@ export const attendanceService = {
           checkOut: null,
           totalHours: '0h 0m',
           status: 'On Leave'
-        };
-
-        if (existingIndex >= 0) {
-          history[existingIndex] = leaveRecord;
-        } else {
-          history.push(leaveRecord);
-        }
+        });
       }
-
-      current.setUTCDate(current.getUTCDate() + 1);
     }
 
     history.sort((a, b) => new Date(b.date) - new Date(a.date));
