@@ -11,12 +11,12 @@ export const Sidebar = ({ isOpen, onClose }) => {
     navigate('/login');
   };
 
+  // Section 0: Employee Navigation Items
   const navItems = [
     {
       name: 'Dashboard',
       path: '/dashboard',
-      icon: 'dashboard',
-      exact: true
+      icon: 'dashboard'
     },
     {
       name: 'Attendance',
@@ -29,28 +29,39 @@ export const Sidebar = ({ isOpen, onClose }) => {
       icon: 'event_busy'
     },
     {
+      name: 'Payroll',
+      path: '/payroll',
+      icon: 'payments'
+    },
+    {
       name: 'Profile',
       path: '/profile',
-      icon: 'person'
+      icon: 'account_circle'
+    },
+    {
+      name: 'Settings',
+      path: '/settings',
+      icon: 'settings'
     }
   ];
 
   return (
     <>
-      {/* Mobile Backdrop */}
+      {/* Mobile Backdrop Overlay */}
       {isOpen && (
         <div
-          className="fixed inset-0 bg-primary/40 backdrop-blur-sm z-40 md:hidden"
+          className="fixed inset-0 bg-primary/40 backdrop-blur-sm z-40 md:hidden transition-opacity duration-300"
           onClick={onClose}
         />
       )}
 
+      {/* Main Sidebar Shell */}
       <aside
-        className={`w-[280px] h-screen fixed left-0 top-0 bg-surface-container-lowest border-r border-surface-variant z-50 flex flex-col py-6 px-4 transition-transform duration-300 ease-in-out ${
+        className={`w-[280px] h-screen fixed left-0 top-0 bg-surface-container-lowest border-r border-outline-variant z-50 flex flex-col py-6 px-4 transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
         }`}
       >
-        {/* Brand Logo & Title */}
+        {/* Brand & Portal Header */}
         <div className="px-3 mb-6 flex items-center justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl bg-primary flex items-center justify-center text-white font-bold shadow-sm">
@@ -70,7 +81,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
           {/* Mobile close button */}
           <button
             onClick={onClose}
-            className="md:hidden text-on-surface-variant hover:text-primary p-1"
+            className="md:hidden text-on-surface-variant hover:text-primary p-1 rounded-lg"
           >
             <span className="material-symbols-outlined text-[20px]">close</span>
           </button>
@@ -79,7 +90,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
         {/* User Card */}
         {user && (
           <div className="flex items-center gap-3 mb-6 p-3 bg-surface-container-low rounded-xl border border-surface-variant/70">
-            <div className="w-11 h-11 rounded-full overflow-hidden shrink-0 border border-surface-variant">
+            <div className="w-11 h-11 rounded-full overflow-hidden shrink-0 border border-surface-variant bg-surface-container">
               <img
                 src={user.avatar}
                 alt={user.name}
@@ -88,24 +99,23 @@ export const Sidebar = ({ isOpen, onClose }) => {
             </div>
             <div className="overflow-hidden">
               <p className="text-sm font-semibold text-primary truncate">{user.name}</p>
-              <p className="text-xs text-on-surface-variant truncate">{user.designation}</p>
+              <p className="text-xs text-on-surface-variant truncate">{user.department}</p>
             </div>
           </div>
         )}
 
-        {/* Navigation Links */}
+        {/* Navigation Items */}
         <nav className="flex-1 overflow-y-auto space-y-1.5 py-1">
           {navItems.map((item) => (
             <NavLink
               key={item.path}
               to={item.path}
-              end={item.exact}
               onClick={onClose}
               className={({ isActive }) =>
                 `flex items-center gap-3.5 px-4 py-3 rounded-xl font-medium text-sm transition-all duration-200 group ${
                   isActive
-                    ? 'text-secondary font-bold border-l-4 border-secondary bg-secondary-fixed/40 shadow-sm'
-                    : 'text-on-surface-variant hover:bg-surface-container hover:text-primary'
+                    ? 'text-secondary font-bold border-l-4 border-secondary bg-secondary-fixed text-on-secondary-container shadow-sm'
+                    : 'text-on-surface-variant hover:bg-surface-container-high hover:text-primary'
                 }`
               }
             >
@@ -125,7 +135,7 @@ export const Sidebar = ({ isOpen, onClose }) => {
           ))}
         </nav>
 
-        {/* Logout (No Help icon here per instructions) */}
+        {/* Logout Action */}
         <div className="pt-4 border-t border-surface-container mt-auto">
           <button
             onClick={handleLogout}

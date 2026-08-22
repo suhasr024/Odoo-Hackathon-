@@ -4,6 +4,7 @@ import { INITIAL_USERS, INITIAL_ACTIVE_SESSIONS } from '../data/mockData';
 const SESSION_KEY = 'auth_session';
 const USERS_KEY = 'users_db';
 const SESSIONS_STORE_KEY = 'active_sessions_store';
+const PENDING_SIGNUPS_KEY = 'pending_signups_db';
 
 export const authService = {
   async init() {
@@ -68,6 +69,51 @@ export const authService = {
       role: safeUser.role,
       isAuthenticated: true
     };
+  },
+
+  async signup(payload) {
+    await this.init();
+    await new Promise(r => setTimeout(r, 250));
+
+    const { employeeId, email, password, role = 'Employee' } = payload;
+
+    if (!email || !email.includes('@')) {
+      throw new Error('Please enter a valid email address.');
+    }
+    if (!password || password.length < 8) {
+      throw new Error('Password must be at least 8 characters long.');
+    }
+    if (!/\d/.test(password)) {
+      throw new Error('Password must contain at least one number.');
+    }
+
+    const users = await storageAdapter.get(USERS_KEY, INITIAL_USERS);
+    const emailExists = users.some(u => u.email.toLowerCase() === email.trim().toLowerCase());
+    if (emailExists) {
+      throw new Error('An account with this email address already exists.');
+    }
+
+    let pendings = await storageAdapter.get(PENDING_SIGNUPS_KEY, []);
+    pendings.push({
+      id: `pending_${Date.now()}`,
+      employeeId: employeeId?.trim() || `EMP-${Date.now()}`,
+      email: email.trim(),
+      passwordHash: password,
+      role: role,
+      status: role === 'Admin' ? 'PENDING_APPROVAL' : 'PENDING_VERIFICATION',
+      createdAt: new Date().toISOString()
+    });
+    await storageAdapter.set(PENDING_SIGNUPS_KEY, pendings);
+
+    return {
+      type: role === 'Admin' ? 'adminApprovalPending' : 'emailVerificationPending',
+      email: email.trim()
+    };
+  },
+
+  async resendVerification(email) {
+    await new Promise(r => setTimeout(r, 150));
+    return true;
   },
 
   async logout() {

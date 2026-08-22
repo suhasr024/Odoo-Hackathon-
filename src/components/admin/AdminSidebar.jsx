@@ -11,6 +11,7 @@ export const AdminSidebar = ({ isOpen, onClose }) => {
     navigate('/login');
   };
 
+  // Section 0: Admin Navigation Items
   const navItems = [
     {
       name: 'Dashboard',
@@ -34,6 +35,16 @@ export const AdminSidebar = ({ isOpen, onClose }) => {
       icon: 'event_busy'
     },
     {
+      name: 'Payroll',
+      path: '/admin/payroll',
+      icon: 'payments'
+    },
+    {
+      name: 'Reports',
+      path: '/admin/reports',
+      icon: 'analytics'
+    },
+    {
       name: 'Settings',
       path: '/admin/settings',
       icon: 'settings'
@@ -55,7 +66,7 @@ export const AdminSidebar = ({ isOpen, onClose }) => {
         />
       )}
 
-      {/* Admin Sidebar Shell matching Executive Zenith design */}
+      {/* Admin Sidebar Shell */}
       <aside
         className={`w-[280px] h-screen fixed left-0 top-0 bg-surface-container-lowest border-r border-outline-variant z-50 flex flex-col py-6 px-4 transition-transform duration-300 ease-in-out ${
           isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'

@@ -1,6 +1,6 @@
 /**
  * Centralized Seed & Mock Data Repository
- * User-specific information is defined here rather than hardcoded in UI components.
+ * All employee records are fully populated with salary and document data.
  */
 
 export const INITIAL_USERS = [
@@ -9,8 +9,8 @@ export const INITIAL_USERS = [
     employeeId: 'EMP-2024-0891',
     name: 'Alex Rivers',
     email: 'alex.morgan@vantage.io',
-    role: 'Employee', // System Access Role
-    designation: 'HR Specialist', // Job Designation
+    role: 'Employee',
+    designation: 'HR Specialist',
     department: 'People & Culture',
     phone: '+1 (555) 234-5678',
     emergencyContact: '+1 (555) 987-6543 (Partner)',
@@ -19,15 +19,29 @@ export const INITIAL_USERS = [
     joinDate: 'March 15, 2022',
     status: 'Active',
     avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDjSPfqm6s5NrbQvqaTWLeZR0p0bKdD3UnsOPV7i1owC5GnH42x4vCa_5-GmjICDSAG5w9gxOGnqyr4iiRGC4gMz8IA7ZbbP9tZSZ6ncB3GgTKirYL3OjI161BRgZbNGmyxOU98vblhCiXoutiigyS_aPY467nlFddJvGBz2H1oA1FIvNYuiuJp4BSgBnGJTQm3uXixNTjeq2zgX2VMtEN0bZcXpAz65IFFs8SuALGt5aYtsS5EuIK5',
-    passwordHash: 'DemoPassword123!'
+    passwordHash: 'DemoPassword123!',
+    salary: {
+      basicPay: 45000,
+      hra: 12000,
+      otherAllowances: 3000,
+      taxDeduction: 4500,
+      otherDeductions: 1200,
+      payPeriod: 'August 2026',
+      history: [
+        { id: 'PAY-2026-07', period: 'July 2026', netAmount: 54300, status: 'Paid', paidOn: '2026-07-31' },
+        { id: 'PAY-2026-06', period: 'June 2026', netAmount: 54300, status: 'Paid', paidOn: '2026-06-30' },
+        { id: 'PAY-2026-05', period: 'May 2026', netAmount: 54300, status: 'Paid', paidOn: '2026-05-31' },
+        { id: 'PAY-2026-04', period: 'April 2026', netAmount: 53800, status: 'Paid', paidOn: '2026-04-30' }
+      ]
+    }
   },
   {
     id: 'usr_adm_002',
     employeeId: 'EMP-2021-0104',
     name: 'Sarah Jenkins',
     email: 'sarah.admin@vantage.io',
-    role: 'Admin', // System Access Role
-    designation: 'VP of People Operations', // Job Designation
+    role: 'Admin',
+    designation: 'VP of People Operations',
     department: 'Executive Leadership',
     phone: '+1 (555) 456-7890',
     emergencyContact: '+1 (555) 321-0987 (Spouse)',
@@ -37,7 +51,19 @@ export const INITIAL_USERS = [
     status: 'Active',
     avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuBK5M9qKEfR9mIHwQy9dEV-SBNbscJHVF2xdJhNsAvklBTU9RxnotbBez81c8RnTvPreEUJd6GKPj33HMCxtcg-auBSVpXH9rQmMsqmbbF_MXx6JIQrqdbje4UHcU5-yhPh0zczU27WO874L2jLlhASLitcn0zp9HSD8ukhiO9XY8fhV7pki3raJPaiWQQHuIA8syTUi_ovblEo2IBGQuaq2u3gknLGUzs1Lt4YnY0VNA3w3lYfvnBH',
     passwordHash: 'AdminPassword123!',
-    twoFactorEnabled: false
+    twoFactorEnabled: false,
+    salary: {
+      basicPay: 85000,
+      hra: 22000,
+      otherAllowances: 8000,
+      taxDeduction: 12000,
+      otherDeductions: 2500,
+      payPeriod: 'August 2026',
+      history: [
+        { id: 'PAY-2026-07', period: 'July 2026', netAmount: 100500, status: 'Paid', paidOn: '2026-07-31' },
+        { id: 'PAY-2026-06', period: 'June 2026', netAmount: 100500, status: 'Paid', paidOn: '2026-06-30' }
+      ]
+    }
   },
   {
     id: 'usr_emp_003',
@@ -54,7 +80,19 @@ export const INITIAL_USERS = [
     joinDate: 'July 1, 2023',
     status: 'Active',
     avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuCqrF__YdWntm3rQdP_mM9PIWMjTDRTJk2wHTRn08cwJbg52VFBAOaeWcdx7pY1K_4lIicUmy_m1C5Rc5KO7j1oEfIMPL4xB7Cdo21f4nzifwS9LIxYHZ7GWqLirmh1DelKOjQcXGfym9M78158-Sk0Q8y_Y1d3ejv44Qv-Q2LaWEZi0sg3kJ4Q99qYIWdJfBtJbD7DeqFlrbZz9G3DX7P4nULpDw1JKRfwTYQJV9UGi9_LynUrMaRV',
-    passwordHash: 'Password123!'
+    passwordHash: 'Password123!',
+    salary: {
+      basicPay: 48000,
+      hra: 13000,
+      otherAllowances: 4000,
+      taxDeduction: 5000,
+      otherDeductions: 1500,
+      payPeriod: 'August 2026',
+      history: [
+        { id: 'PAY-2026-07', period: 'July 2026', netAmount: 58500, status: 'Paid', paidOn: '2026-07-31' },
+        { id: 'PAY-2026-06', period: 'June 2026', netAmount: 58500, status: 'Paid', paidOn: '2026-06-30' }
+      ]
+    }
   },
   {
     id: 'usr_emp_004',
@@ -71,7 +109,19 @@ export const INITIAL_USERS = [
     joinDate: 'September 12, 2022',
     status: 'Active',
     avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuByiQaXQGNT9RnF79cPVlkls24h6e4faYEYE3u6w0PPRm0OlapurICL-jnNsOiv7vRl6MXMBL2kpba4cKp7tKNJbu0_vPoNaxRQNns0Zd5qeLUh8mOjfD6PHLete6ovdn4DIfwmUb6Vm-cwVBYUn5_UAfHK1p5nyu3tv2G3WCc3fllYK7WXByg26aQcN3iz6e-j-oRgRG5H65BtNwBABLeckNHCokXhSq8yBt_jhrq2UPbeEemLRl7T',
-    passwordHash: 'Password123!'
+    passwordHash: 'Password123!',
+    salary: {
+      basicPay: 52000,
+      hra: 14000,
+      otherAllowances: 3500,
+      taxDeduction: 5500,
+      otherDeductions: 1200,
+      payPeriod: 'August 2026',
+      history: [
+        { id: 'PAY-2026-07', period: 'July 2026', netAmount: 62800, status: 'Paid', paidOn: '2026-07-31' },
+        { id: 'PAY-2026-06', period: 'June 2026', netAmount: 62800, status: 'Paid', paidOn: '2026-06-30' }
+      ]
+    }
   },
   {
     id: 'usr_emp_005',
@@ -88,7 +138,19 @@ export const INITIAL_USERS = [
     joinDate: 'January 15, 2024',
     status: 'Active',
     avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuAz0HIhGe2cS9AZNqYGG2Bd5jHbrBG_KbdCyE6NTg48ncxgGYq9oyPyCB6b8VFlxVoVO1HFnpDjOq64Zm5tLhH8KMe_hhu7NCiCcsM0zuH1UDicKPPi0_GlgdCBo0wXdfUv1rSEWtECe1ZdGR3b3AGQWMKwLGKod2vkZ5hsixBEgh6hfC5TQamLpjrOQ6m0MyhAmXSKgLd39fF1K7oj_Aq4G8ERPq75kZMyCPZHCpGMNzSAFgZq-Yu7',
-    passwordHash: 'Password123!'
+    passwordHash: 'Password123!',
+    salary: {
+      basicPay: 46000,
+      hra: 12500,
+      otherAllowances: 2500,
+      taxDeduction: 4800,
+      otherDeductions: 1000,
+      payPeriod: 'August 2026',
+      history: [
+        { id: 'PAY-2026-07', period: 'July 2026', netAmount: 55200, status: 'Paid', paidOn: '2026-07-31' },
+        { id: 'PAY-2026-06', period: 'June 2026', netAmount: 55200, status: 'Paid', paidOn: '2026-06-30' }
+      ]
+    }
   },
   {
     id: 'usr_emp_006',
@@ -105,7 +167,18 @@ export const INITIAL_USERS = [
     joinDate: 'August 5, 2023',
     status: 'Inactive',
     avatar: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDLqpHbrDVqCRuvmmlvYI6k1y0hBX9cQKOn8yGkzDNPVJEiispBlBGNbKx9De1o6AEiJuOQfVgdI9sigQ4c7wlOWyMMrrzhY1QaNhPZ7tl0l0v378savuzfjqgKePpT8b-yY5XhtXM_GC6vg2zoCSHf9WDxYpIkt1YV36fOWNpCaqQDR85__79sUbRySDCJp4Z_aSHlcwIOpHo-3WY86a251fABhtqsWsGBODyf4LnbNFYgvGCy99dA',
-    passwordHash: 'Password123!'
+    passwordHash: 'Password123!',
+    salary: {
+      basicPay: 55000,
+      hra: 15000,
+      otherAllowances: 4000,
+      taxDeduction: 6000,
+      otherDeductions: 1400,
+      payPeriod: 'August 2026',
+      history: [
+        { id: 'PAY-2026-07', period: 'July 2026', netAmount: 66600, status: 'Paid', paidOn: '2026-07-31' }
+      ]
+    }
   }
 ];
 
@@ -148,7 +221,7 @@ export const INITIAL_LEAVE_REQUESTS = [
     leaveTypeName: 'Annual Leave',
     startDate: '2026-09-10',
     endDate: '2026-09-14',
-    durationDays: 5,
+    durationDays: 3, // Working days (Thu, Fri, Mon)
     reason: 'Family vacation and personal downtime.',
     attachmentName: 'itinerary_booking.pdf',
     attachmentUrl: null,
@@ -264,6 +337,53 @@ export const INITIAL_SETTINGS = {
   }
 };
 
+export const INITIAL_DOCUMENTS = {
+  usr_emp_001: [
+    {
+      id: 'doc_1',
+      name: 'W-4_Tax_Withholding_2026.pdf',
+      type: 'Tax Document',
+      fileType: 'application/pdf',
+      size: '245 KB',
+      uploadedDate: '2026-01-15'
+    },
+    {
+      id: 'doc_2',
+      name: 'Employment_Agreement_Vantage.pdf',
+      type: 'Contract',
+      fileType: 'application/pdf',
+      size: '1.2 MB',
+      uploadedDate: '2022-03-15'
+    },
+    {
+      id: 'doc_3',
+      name: 'Health_Benefits_Enrollment_Summary.pdf',
+      type: 'Benefits',
+      fileType: 'application/pdf',
+      size: '512 KB',
+      uploadedDate: '2026-02-01'
+    }
+  ],
+  usr_adm_002: [
+    {
+      id: 'doc_adm_1',
+      name: 'Executive_Compensation_Plan.pdf',
+      type: 'Contract',
+      fileType: 'application/pdf',
+      size: '1.8 MB',
+      uploadedDate: '2021-01-10'
+    },
+    {
+      id: 'doc_adm_2',
+      name: 'Confidentiality_&_IP_Assignment.pdf',
+      type: 'Legal',
+      fileType: 'application/pdf',
+      size: '420 KB',
+      uploadedDate: '2021-01-10'
+    }
+  ]
+};
+
 export const INITIAL_ACTIVE_SESSIONS = {
   usr_adm_002: [
     {
@@ -291,6 +411,7 @@ export const INITIAL_ACTIVE_SESSIONS = {
     }
   ]
 };
+
 
 export const generateInitialAttendance = (userId) => {
   const currentYear = 2026;
