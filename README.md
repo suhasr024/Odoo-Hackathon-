@@ -65,7 +65,7 @@ The frontend is built as four independent, stacked layers, so a real backend can
 ## 📦 Running It Locally
 
 ### You'll need
-- Node.js 18+
+- Node.js 20.19+
 - npm or yarn
 
 ### Setup
@@ -135,3 +135,7 @@ Submitted as a hackathon project — license not yet finalized.
 ## 🙌 Credits
 
 Styled with the Vantage / Executive Zenith design system: Slate (`#1e293b`) and Electric Blue (`#0ea5e9`), set in Inter.
+
+## Live Deployment
+
+[Open the Vantage HRMS app on Vercel](https://odoo-hackathon-eight-ecru.vercel.app/)
