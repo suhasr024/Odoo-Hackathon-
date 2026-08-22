@@ -1,6 +1,8 @@
 import { storageAdapter } from './storage/storageAdapter';
 import { INITIAL_LEAVE_BALANCES, INITIAL_LEAVE_REQUESTS, INITIAL_USERS } from '../data/mockData';
 import { getLeavePolicy } from '../config/leavePolicy';
+import { attendanceService } from './attendanceService';
+import { notificationService } from './notificationService';
 
 const LEAVE_REQUESTS_KEY = 'leave_requests_db';
 const LEAVE_BALANCES_KEY = 'leave_balances_db';
@@ -104,6 +106,18 @@ export const leaveService = {
     allRequests.unshift(newRequest);
     await storageAdapter.set(LEAVE_REQUESTS_KEY, allRequests);
 
+    // Notify admins of new leave application
+    const adminUser = users.find(u => u.role === 'Admin');
+    if (adminUser) {
+      await notificationService.createNotification({
+        userId: adminUser.id,
+        title: 'New Leave Request',
+        message: `${newRequest.userName} applied for ${policy.name} (${startDate} to ${endDate}).`,
+        type: 'leave_submitted',
+        link: '/admin/leaves'
+      });
+    }
+
     return newRequest;
   },
 
@@ -143,6 +157,14 @@ export const leaveService = {
       await storageAdapter.set(LEAVE_BALANCES_KEY, allBalances);
     }
 
+    // Sync Attendance: Mark attendance records as 'On Leave' for the approved date range
+    await attendanceService.markLeaveAttendance(
+      request.userId,
+      request.startDate,
+      request.endDate,
+      request.leaveTypeName
+    );
+
     allRequests[index] = {
       ...request,
       status: 'Approved',
@@ -150,6 +172,16 @@ export const leaveService = {
     };
 
     await storageAdapter.set(LEAVE_REQUESTS_KEY, allRequests);
+
+    // Notify employee of approval
+    await notificationService.createNotification({
+      userId: request.userId,
+      title: 'Leave Request Approved',
+      message: `Your ${request.leaveTypeName} request for ${request.startDate} to ${request.endDate} was approved.`,
+      type: 'leave_approved',
+      link: '/leave-requests'
+    });
+
     return allRequests[index];
   },
 
@@ -181,6 +213,16 @@ export const leaveService = {
     };
 
     await storageAdapter.set(LEAVE_REQUESTS_KEY, allRequests);
+
+    // Notify employee of rejection with reason
+    await notificationService.createNotification({
+      userId: request.userId,
+      title: 'Leave Request Declined',
+      message: `Your ${request.leaveTypeName} request was rejected: "${rejectionReason.trim()}".`,
+      type: 'leave_rejected',
+      link: '/leave-requests'
+    });
+
     return allRequests[index];
   },
 

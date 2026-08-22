@@ -61,6 +61,8 @@ export const employeeService = {
     const users = await storageAdapter.get(USERS_KEY, INITIAL_USERS);
 
     // Validate email format and uniqueness
+    // NOTE: This client-side validation against local cache is sufficient for prototype/demo.
+    // TODO: When connecting to real backend API/PostgreSQL/MySQL, this MUST be backed by a UNIQUE database constraint on the email column.
     if (!payload.email || !payload.email.includes('@')) {
       throw new Error('Please enter a valid work email address.');
     }

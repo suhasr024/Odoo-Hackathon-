@@ -1,8 +1,11 @@
 /**
  * Attachment Service Abstraction
- * Handles client-side validation and blob preview generation.
- * Ready for cloud/S3/backend upload adapter.
+ * Handles client-side validation and isolates raw file storage in IndexedDB to protect localStorage quota.
+ *
+ * // TODO: Replace indexedDbAdapter with real backend/S3 multipart upload endpoint once backend is active.
  */
+import { indexedDbAdapter } from './storage/indexedDbAdapter';
+
 export const ALLOWED_ATTACHMENT_TYPES = [
   'image/png',
   'image/jpeg',
@@ -41,13 +44,24 @@ export const attachmentService = {
       throw new Error(validation.error);
     }
 
-    // In a real app with backend, this would upload to server/S3.
-    // In demo mode, create a local object URL for preview.
+    const storageKey = `att_file_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+    
+    // Save binary data to IndexedDB
+    try {
+      await indexedDbAdapter.saveAttachment(storageKey, file);
+    } catch (err) {
+      console.warn('IndexedDB save failed, falling back to local object URL:', err);
+    }
+
     const previewUrl = URL.createObjectURL(file);
+
+    // Return lightweight metadata only (stored in localStorage without bloat)
     return {
+      storageKey,
       fileName: file.name,
       fileSize: file.size,
       fileType: file.type,
+      uploadDate: new Date().toISOString(),
       previewUrl
     };
   }

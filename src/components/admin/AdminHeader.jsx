@@ -3,6 +3,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useEmployees } from '../../hooks/useEmployees';
 import { Modal } from '../common/Modal';
+import { NotificationPopover } from '../common/NotificationPopover';
 
 export const AdminHeader = ({ onMobileMenuToggle }) => {
   const { user } = useAuth();
@@ -19,7 +20,7 @@ export const AdminHeader = ({ onMobileMenuToggle }) => {
     if (path === '/admin') return 'Admin Overview';
     if (path === '/admin/employees') return 'Employee Management';
     if (path === '/admin/attendance') return 'Attendance Overview';
-    if (path === '/admin/leaves') return 'Leave Management';
+    if (path === '/admin/leaves' || path === '/admin/leave-requests') return 'Leave Management';
     if (path === '/admin/settings') return 'System Settings';
     if (path === '/admin/profile') return 'Administrator Profile';
     return 'Admin Panel';
@@ -103,14 +104,8 @@ export const AdminHeader = ({ onMobileMenuToggle }) => {
             )}
           </div>
 
-          {/* Notifications */}
-          <button
-            className="p-2 rounded-full text-on-surface-variant hover:bg-surface-container-high transition-colors cursor-pointer relative"
-            title="Notifications"
-          >
-            <span className="material-symbols-outlined text-[20px]">notifications</span>
-            <span className="absolute top-1.5 right-1.5 w-2 h-2 bg-error rounded-full ring-2 ring-surface"></span>
-          </button>
+          {/* Active Notifications Popover */}
+          <NotificationPopover />
 
           {/* Quick Help Modal Trigger */}
           <button

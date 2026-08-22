@@ -81,6 +81,7 @@ export const App = () => {
                       <Route path="employees" element={<EmployeeManagementPage />} />
                       <Route path="attendance" element={<AdminAttendancePage />} />
                       <Route path="leaves" element={<AdminLeaveRequestsPage />} />
+                      <Route path="leave-requests" element={<AdminLeaveRequestsPage />} /> {/* Route Alias */}
                       <Route path="settings" element={<AdminSettingsPage />} />
                       <Route path="profile" element={<AdminProfilePage />} />
                     </Route>

@@ -159,6 +159,50 @@ export const attendanceService = {
     return completedSession;
   },
 
+  /**
+   * Upsert attendance records with status 'On Leave' for an approved leave date range.
+   * Skips weekend days (Saturday & Sunday) per working-day policy.
+   */
+  async markLeaveAttendance(userId, startDateStr, endDateStr, leaveTypeName = 'Leave') {
+    const historyKey = `${ATTENDANCE_HISTORY_KEY}${userId}`;
+    const history = await this.initUserAttendance(userId);
+
+    const start = new Date(startDateStr + 'T00:00:00Z');
+    const end = new Date(endDateStr + 'T00:00:00Z');
+
+    let current = new Date(start);
+    while (current <= end) {
+      const dayOfWeek = current.getUTCDay(); // 0 = Sunday, 6 = Saturday
+      const dateStr = current.toISOString().split('T')[0];
+
+      // Mark only working days (Monday - Friday)
+      if (dayOfWeek !== 0 && dayOfWeek !== 6) {
+        const existingIndex = history.findIndex(r => r.date === dateStr);
+        const leaveRecord = {
+          id: `att_${dateStr}_${userId}`,
+          userId,
+          date: dateStr,
+          checkIn: null,
+          checkOut: null,
+          totalHours: '0h 0m',
+          status: 'On Leave'
+        };
+
+        if (existingIndex >= 0) {
+          history[existingIndex] = leaveRecord;
+        } else {
+          history.push(leaveRecord);
+        }
+      }
+
+      current.setUTCDate(current.getUTCDate() + 1);
+    }
+
+    history.sort((a, b) => new Date(b.date) - new Date(a.date));
+    await storageAdapter.set(historyKey, history);
+    return history;
+  },
+
   async getAttendanceHistory(userId, year, month) {
     const history = await this.initUserAttendance(userId);
     

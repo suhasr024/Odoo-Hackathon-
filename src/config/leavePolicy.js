@@ -25,7 +25,7 @@ export const LEAVE_POLICIES = {
     id: 'unpaid',
     name: 'Unpaid Leave',
     allowPastDates: false,
-    requiresBalance: false, // Uncapped unless restricted by organization
+    requiresBalance: true, // Option A: Capped at yearly organizational allowance (default: 30 days)
     defaultAllowance: 30,
     unit: 'Days',
     description: 'Time off without compensation when other balances are exhausted.'
