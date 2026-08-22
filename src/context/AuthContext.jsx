@@ -21,12 +21,6 @@ export const AuthProvider = ({ children }) => {
         setUser(session.user);
         setRole(session.role);
         setIsAuthenticated(true);
-      } else {
-        // Auto-login default employee for seamless evaluation demo
-        const defaultEmp = await authService.login('alex.morgan@vantage.io', 'DemoPassword123!');
-        setUser(defaultEmp.user);
-        setRole(defaultEmp.role);
-        setIsAuthenticated(true);
       }
     } catch (err) {
       console.error('[AuthContext] Session init error:', err);
