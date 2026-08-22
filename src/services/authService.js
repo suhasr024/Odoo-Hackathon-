@@ -76,7 +76,7 @@ export const authService = {
     await this.init();
     await new Promise(r => setTimeout(r, 250));
 
-    const { name, employeeId, email, password, role = 'Employee' } = payload;
+    const { name, employeeId, department, designation, email, password, role = 'Employee' } = payload;
 
     if (!name || !name.trim()) {
       throw new Error('Please enter your full name.');
@@ -100,6 +100,8 @@ export const authService = {
     const trimmedName = name.trim();
     const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(trimmedName)}&background=0ea5e9&color=fff&bold=true`;
     const genEmpId = employeeId?.trim() || `EMP-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const userDept = department?.trim() || 'Engineering';
+    const userDesig = designation?.trim() || 'Software Engineer';
 
     if (role === 'Employee') {
       // 1. Create real, active employee record directly in users_db
@@ -110,12 +112,12 @@ export const authService = {
         name: trimmedName,
         email: email.trim(),
         role: 'Employee',
-        designation: 'Associate Specialist',
-        department: 'People & Operations',
+        designation: userDesig,
+        department: userDept,
         phone: '',
         emergencyContact: '',
         address: '',
-        bio: 'Team member at Vantage Technologies.',
+        bio: `${userDesig} in ${userDept} at Vantage Technologies.`,
         joinDate: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
         status: 'Active',
         avatar: fallbackAvatar,
@@ -155,6 +157,8 @@ export const authService = {
         id: `pending_${Date.now()}`,
         name: trimmedName,
         employeeId: genEmpId,
+        department: userDept,
+        designation: userDesig,
         email: email.trim(),
         passwordHash: password,
         role: 'Admin',
@@ -193,8 +197,8 @@ export const authService = {
       name: pendingItem.name,
       email: pendingItem.email,
       role: 'Admin',
-      designation: 'Operations Administrator',
-      department: 'Executive Operations',
+      designation: pendingItem.designation || 'Operations Administrator',
+      department: pendingItem.department || 'Executive Leadership',
       phone: '',
       emergencyContact: '',
       address: '',

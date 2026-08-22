@@ -3,6 +3,7 @@ import { useEmployees } from '../../hooks/useEmployees';
 import { Modal } from '../../components/common/Modal';
 import { LoadingSkeleton } from '../../components/common/LoadingSkeleton';
 import { EmptyState } from '../../components/common/EmptyState';
+import { DEPARTMENTS, DESIGNATIONS } from '../../config/organizationOptions';
 
 export const EmployeeManagementPage = () => {
   const {
@@ -49,10 +50,6 @@ export const EmployeeManagementPage = () => {
     phone: '',
     status: 'Active'
   });
-
-  const departmentList = [
-    'Engineering', 'Marketing', 'Finance', 'Design', 'People & Culture', 'Executive Leadership'
-  ];
 
   const handleAddSubmit = async (e) => {
     e.preventDefault();
@@ -159,7 +156,7 @@ export const EmployeeManagementPage = () => {
             className="px-3 py-2 text-xs font-semibold rounded-xl bg-surface-container-low border border-surface-variant text-primary outline-none"
           >
             <option value="ALL">All Departments</option>
-            {departmentList.map(d => (
+            {DEPARTMENTS.map(d => (
               <option key={d} value={d}>{d}</option>
             ))}
           </select>
@@ -371,7 +368,7 @@ export const EmployeeManagementPage = () => {
                 onChange={(e) => setAddForm({ ...addForm, department: e.target.value })}
                 className="w-full px-3.5 py-2 rounded-xl border border-surface-variant bg-white text-primary outline-none focus:border-secondary"
               >
-                {departmentList.map(d => (
+                {DEPARTMENTS.map(d => (
                   <option key={d} value={d}>{d}</option>
                 ))}
               </select>
@@ -383,12 +380,18 @@ export const EmployeeManagementPage = () => {
               </label>
               <input
                 type="text"
+                list="add-designation-options"
                 required
                 value={addForm.designation}
                 onChange={(e) => setAddForm({ ...addForm, designation: e.target.value })}
-                placeholder="e.g. Frontend Engineer"
+                placeholder="Select or type role"
                 className="w-full px-3.5 py-2 rounded-xl border border-surface-variant bg-white text-primary outline-none focus:border-secondary"
               />
+              <datalist id="add-designation-options">
+                {DESIGNATIONS.map(d => (
+                  <option key={d} value={d} />
+                ))}
+              </datalist>
             </div>
           </div>
 
@@ -473,7 +476,7 @@ export const EmployeeManagementPage = () => {
                   onChange={(e) => setEditForm({ ...editForm, department: e.target.value })}
                   className="w-full px-3.5 py-2 rounded-xl border border-surface-variant bg-white text-primary outline-none focus:border-secondary"
                 >
-                  {departmentList.map(d => (
+                  {DEPARTMENTS.map(d => (
                     <option key={d} value={d}>{d}</option>
                   ))}
                 </select>
@@ -485,11 +488,18 @@ export const EmployeeManagementPage = () => {
                 </label>
                 <input
                   type="text"
+                  list="edit-designation-options"
                   required
                   value={editForm.designation}
                   onChange={(e) => setEditForm({ ...editForm, designation: e.target.value })}
+                  placeholder="Select or type role"
                   className="w-full px-3.5 py-2 rounded-xl border border-surface-variant bg-white text-primary outline-none focus:border-secondary"
                 />
+                <datalist id="edit-designation-options">
+                  {DESIGNATIONS.map(d => (
+                    <option key={d} value={d} />
+                  ))}
+                </datalist>
               </div>
             </div>
 

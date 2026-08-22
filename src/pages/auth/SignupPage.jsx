@@ -3,6 +3,7 @@ import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import { useToast } from '../../hooks/useToast';
 import { PasswordInput } from '../../components/common/PasswordInput';
+import { DEPARTMENTS, DESIGNATIONS } from '../../config/organizationOptions';
 
 export const SignupPage = () => {
   const navigate = useNavigate();
@@ -11,6 +12,8 @@ export const SignupPage = () => {
   const [formData, setFormData] = useState({
     name: '',
     employeeId: '',
+    department: '',
+    designation: '',
     email: '',
     password: '',
     confirmPassword: '',
@@ -26,6 +29,16 @@ export const SignupPage = () => {
 
     if (!formData.name.trim()) {
       setError('Please enter your full name.');
+      return;
+    }
+
+    if (!formData.department) {
+      setError('Please select a department.');
+      return;
+    }
+
+    if (!formData.designation.trim()) {
+      setError('Please select or enter your designation.');
       return;
     }
 
@@ -112,6 +125,46 @@ export const SignupPage = () => {
                 />
               </div>
 
+              {/* Department & Designation (2-column layout) */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className="block font-bold text-on-surface-variant uppercase tracking-wider mb-1">
+                    Department <span className="text-error">*</span>
+                  </label>
+                  <select
+                    required
+                    value={formData.department}
+                    onChange={(e) => setFormData({ ...formData, department: e.target.value })}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-surface-variant bg-white text-primary outline-none focus:border-secondary"
+                  >
+                    <option value="" disabled>Select department</option>
+                    {DEPARTMENTS.map(d => (
+                      <option key={d} value={d}>{d}</option>
+                    ))}
+                  </select>
+                </div>
+
+                <div>
+                  <label className="block font-bold text-on-surface-variant uppercase tracking-wider mb-1">
+                    Designation <span className="text-error">*</span>
+                  </label>
+                  <input
+                    type="text"
+                    list="signup-designation-options"
+                    required
+                    value={formData.designation}
+                    onChange={(e) => setFormData({ ...formData, designation: e.target.value })}
+                    placeholder="Select or type role"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-surface-variant bg-white text-primary outline-none focus:border-secondary"
+                  />
+                  <datalist id="signup-designation-options">
+                    {DESIGNATIONS.map(d => (
+                      <option key={d} value={d} />
+                    ))}
+                  </datalist>
+                </div>
+              </div>
+
               {/* Work Email */}
               <div>
                 <label className="block font-bold text-on-surface-variant uppercase tracking-wider mb-1">
@@ -195,7 +248,7 @@ export const SignupPage = () => {
             </div>
             <h2 className="text-xl font-bold text-primary">Account Created!</h2>
             <p className="text-xs text-on-surface-variant leading-relaxed">
-              Welcome, <strong>{formData.name}</strong>! Your account has been initialized. Please check your email (<strong>{formData.email}</strong>) to verify your address, or sign in directly to your Vantage Employee Suite.
+              Welcome, <strong>{formData.name}</strong> ({formData.designation}, {formData.department})! Your account has been initialized. Please check your email (<strong>{formData.email}</strong>) to verify your address, or sign in directly to your Vantage Employee Suite.
             </p>
             <div className="pt-2">
               <button
@@ -220,7 +273,7 @@ export const SignupPage = () => {
             </div>
             <h2 className="text-xl font-bold text-primary">Request Submitted</h2>
             <p className="text-xs text-on-surface-variant leading-relaxed">
-              Your administrative account request for <strong>{formData.name}</strong> ({formData.email}) has been submitted for approval. You will receive access once an administrator approves your request in the Admin Control Center.
+              Your administrative account request for <strong>{formData.name}</strong> ({formData.designation}, {formData.department}) has been submitted for approval. You will receive access once an administrator approves your request in the Admin Control Center.
             </p>
             <button
               onClick={() => navigate('/login')}
