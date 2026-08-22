@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { usePayroll } from '../../hooks/usePayroll';
@@ -13,6 +13,7 @@ export const ProfilePage = () => {
   const { success, error: toastError } = useToast();
   const navigate = useNavigate();
   const [searchParams, setSearchParams] = useSearchParams();
+  const avatarInputRef = useRef(null);
 
   // Active Tab: PROFILE / DOCUMENTS / SALARY
   const initialTab = searchParams.get('tab') || 'profile';
@@ -29,6 +30,10 @@ export const ProfilePage = () => {
     setActiveTab(tabId);
     setSearchParams({ tab: tabId });
   };
+
+  // Avatar Upload State
+  const [avatarPreview, setAvatarPreview] = useState(null);
+  const [isUploadingAvatar, setIsUploadingAvatar] = useState(false);
 
   // Personal Info Edit State
   const [isEditing, setIsEditing] = useState(false);
@@ -71,9 +76,49 @@ export const ProfilePage = () => {
         address: user.address || '',
         bio: user.bio || ''
       });
+      setAvatarPreview(user.avatar || null);
       fetchDocs();
     }
   }, [user]);
+
+  // Avatar Upload Handler
+  const handleAvatarChange = (e) => {
+    const file = e.target.files[0];
+    if (!file) return;
+
+    // Validate type (PNG/JPG)
+    if (!['image/png', 'image/jpeg', 'image/jpg'].includes(file.type)) {
+      toastError('Invalid photo format. Please select a PNG or JPG image.');
+      return;
+    }
+
+    // Validate size (max 5MB)
+    if (file.size > 5 * 1024 * 1024) {
+      toastError('Profile photo exceeds the 5 MB size limit.');
+      return;
+    }
+
+    setIsUploadingAvatar(true);
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      const dataUrl = event.target.result;
+      setAvatarPreview(dataUrl); // Immediate optimistic preview
+      try {
+        await updateProfile({ avatar: dataUrl });
+        success('Profile photo updated successfully.');
+      } catch (err) {
+        toastError(err.message || 'Failed to update profile photo.');
+        setAvatarPreview(user.avatar); // Revert on failure
+      } finally {
+        setIsUploadingAvatar(false);
+      }
+    };
+    reader.onerror = () => {
+      toastError('Failed to read image file.');
+      setIsUploadingAvatar(false);
+    };
+    reader.readAsDataURL(file);
+  };
 
   const handleSaveProfile = async (e) => {
     e.preventDefault();
@@ -214,14 +259,39 @@ export const ProfilePage = () => {
       {/* TAB 1: PROFILE */}
       {activeTab === 'profile' && (
         <div className="grid grid-cols-1 md:grid-cols-12 gap-6">
-          {/* Profile Summary Card (Col Span 4) */}
+          {/* Profile Summary Card with Avatar Upload (Col Span 4) */}
           <div className="md:col-span-4 bg-surface-container-lowest rounded-2xl p-6 md:p-8 shadow-level-1 border border-outline-variant flex flex-col items-center text-center">
-            <div className="w-28 h-28 md:w-32 md:h-32 rounded-full border-4 border-surface bg-surface-container overflow-hidden mb-4 shadow-sm">
-              <img
-                src={user.avatar}
-                alt={user.name}
-                className="w-full h-full object-cover"
+            {/* Avatar with Camera Icon Overlay */}
+            <div className="relative group mb-4">
+              <div className="w-28 h-28 md:w-32 md:h-32 rounded-full border-4 border-surface bg-surface-container overflow-hidden shadow-sm">
+                <img
+                  src={avatarPreview || user.avatar}
+                  alt={user.name}
+                  className="w-full h-full object-cover"
+                />
+              </div>
+
+              {/* Hidden file input */}
+              <input
+                ref={avatarInputRef}
+                type="file"
+                accept="image/png,image/jpeg,image/jpg"
+                className="hidden"
+                onChange={handleAvatarChange}
               />
+
+              {/* Edit/Camera icon button */}
+              <button
+                type="button"
+                onClick={() => avatarInputRef.current?.click()}
+                disabled={isUploadingAvatar}
+                className="absolute bottom-1 right-1 w-9 h-9 rounded-full bg-secondary text-white shadow-md hover:bg-secondary-container hover:text-on-secondary-container flex items-center justify-center transition-all cursor-pointer border-2 border-surface active:scale-95"
+                title="Change profile picture"
+              >
+                <span className="material-symbols-outlined text-[18px]">
+                  {isUploadingAvatar ? 'hourglass_top' : 'photo_camera'}
+                </span>
+              </button>
             </div>
 
             <h2 className="text-lg font-bold text-primary">{user.name}</h2>
