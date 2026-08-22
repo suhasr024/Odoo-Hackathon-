@@ -52,10 +52,6 @@ export const AdminProfilePage = () => {
   const [is2FAModalOpen, setIs2FAModalOpen] = useState(false);
   const [saving2FA, setSaving2FA] = useState(false);
 
-  // Active Sessions State
-  const [sessions, setSessions] = useState([]);
-  const [isSessionsModalOpen, setIsSessionsModalOpen] = useState(false);
-
   // Documents State
   const [documents, setDocuments] = useState([]);
   const [uploadingDoc, setUploadingDoc] = useState(false);
@@ -80,7 +76,6 @@ export const AdminProfilePage = () => {
         bio: user.bio || ''
       });
       setIs2FAEnabled(Boolean(user.twoFactorEnabled));
-      authService.getActiveSessions(user.id).then(setSessions);
       fetchDocs();
     }
   }, [user]);
@@ -145,16 +140,6 @@ export const AdminProfilePage = () => {
       console.error(err);
     } finally {
       setSaving2FA(false);
-    }
-  };
-
-  const handleRevokeSession = async (sessionId) => {
-    if (!user) return;
-    try {
-      const updated = await authService.revokeSession(user.id, sessionId);
-      setSessions(updated);
-    } catch (err) {
-      console.error(err);
     }
   };
 
@@ -410,25 +395,6 @@ export const AdminProfilePage = () => {
                 </button>
               </div>
             </div>
-
-            {/* Active Sessions Card */}
-            <div className="bg-surface-container-lowest rounded-2xl p-6 shadow-level-1 border border-outline-variant flex justify-between items-center">
-              <div>
-                <div className="flex items-center gap-2 mb-1">
-                  <span className="material-symbols-outlined text-secondary">devices</span>
-                  <h4 className="text-sm font-bold text-primary">Active Sessions</h4>
-                </div>
-                <p className="text-xs text-on-surface-variant">
-                  {sessions.length} active login session(s) recorded
-                </p>
-              </div>
-              <button
-                onClick={() => setIsSessionsModalOpen(true)}
-                className="px-4 py-2 text-xs font-semibold rounded-lg bg-surface-container-low hover:bg-surface-container text-primary transition-colors"
-              >
-                Review Sessions
-              </button>
-            </div>
           </div>
         </div>
       )}
@@ -619,48 +585,6 @@ export const AdminProfilePage = () => {
               }`}
             >
               {saving2FA ? 'Updating...' : (is2FAEnabled ? 'Confirm Disable' : 'Confirm Enable')}
-            </button>
-          </div>
-        </div>
-      </Modal>
-
-      {/* Active Sessions Modal */}
-      <Modal
-        isOpen={isSessionsModalOpen}
-        onClose={() => setIsSessionsModalOpen(false)}
-        title="Active User Sessions"
-        maxWidth="max-w-lg"
-      >
-        <div className="space-y-3 text-xs">
-          <p className="text-on-surface-variant mb-2">
-            Centralized active login sessions for your administrator account:
-          </p>
-          {sessions.map((sess) => (
-            <div key={sess.id} className="p-3 bg-surface-container-low rounded-xl border border-surface-variant flex justify-between items-center">
-              <div>
-                <p className="font-bold text-primary">{sess.device}</p>
-                <p className="text-[11px] text-on-surface-variant">{sess.ipAddress} • {sess.lastActive}</p>
-              </div>
-              {sess.isCurrent ? (
-                <span className="text-[10px] font-bold text-on-tertiary-container bg-tertiary-fixed/30 px-2 py-0.5 rounded-full">
-                  Current Session
-                </span>
-              ) : (
-                <button
-                  onClick={() => handleRevokeSession(sess.id)}
-                  className="text-xs text-error font-semibold hover:underline"
-                >
-                  Revoke
-                </button>
-              )}
-            </div>
-          ))}
-          <div className="pt-3 border-t border-surface-container flex justify-end">
-            <button
-              onClick={() => setIsSessionsModalOpen(false)}
-              className="px-4 py-2 bg-primary text-white font-semibold rounded-lg hover:bg-primary-container"
-            >
-              Close
             </button>
           </div>
         </div>
