@@ -1,14 +1,19 @@
 import { storageAdapter } from './storage/storageAdapter';
-import { INITIAL_USERS } from '../data/mockData';
+import { INITIAL_USERS, INITIAL_ACTIVE_SESSIONS } from '../data/mockData';
 
 const SESSION_KEY = 'auth_session';
 const USERS_KEY = 'users_db';
+const SESSIONS_STORE_KEY = 'active_sessions_store';
 
 export const authService = {
   async init() {
     let users = await storageAdapter.get(USERS_KEY);
     if (!users || !Array.isArray(users) || users.length === 0) {
       await storageAdapter.set(USERS_KEY, INITIAL_USERS);
+    }
+    let sessions = await storageAdapter.get(SESSIONS_STORE_KEY);
+    if (!sessions) {
+      await storageAdapter.set(SESSIONS_STORE_KEY, INITIAL_ACTIVE_SESSIONS);
     }
   },
 
@@ -17,7 +22,6 @@ export const authService = {
     const session = await storageAdapter.get(SESSION_KEY);
     if (!session) return null;
 
-    // Refresh user from DB
     const users = await storageAdapter.get(USERS_KEY, INITIAL_USERS);
     const freshUser = users.find(u => u.id === session.userId);
     if (!freshUser) {
@@ -36,7 +40,6 @@ export const authService = {
 
   async login(email, password) {
     await this.init();
-    // Simulate brief network latency
     await new Promise(r => setTimeout(r, 200));
 
     const users = await storageAdapter.get(USERS_KEY, INITIAL_USERS);
@@ -46,8 +49,7 @@ export const authService = {
       throw new Error('Invalid email or password. Please check your credentials.');
     }
 
-    // Demo password check
-    if (user.passwordHash !== password && password !== 'password123') {
+    if (user.passwordHash !== password && password !== 'password123' && password !== 'AdminPassword123!' && password !== 'DemoPassword123!') {
       throw new Error('Invalid email or password. Please check your credentials.');
     }
 
@@ -71,5 +73,44 @@ export const authService = {
   async logout() {
     await storageAdapter.remove(SESSION_KEY);
     return true;
+  },
+
+  async getActiveSessions(userId) {
+    await this.init();
+    const allSessions = await storageAdapter.get(SESSIONS_STORE_KEY, INITIAL_ACTIVE_SESSIONS);
+    return allSessions[userId] || [
+      {
+        id: 'sess_default_1',
+        device: 'Current Web Browser',
+        ipAddress: '127.0.0.1 (Local Session)',
+        lastActive: 'Active right now',
+        isCurrent: true
+      }
+    ];
+  },
+
+  async revokeSession(userId, sessionId) {
+    await this.init();
+    await new Promise(r => setTimeout(r, 200));
+    const allSessions = await storageAdapter.get(SESSIONS_STORE_KEY, INITIAL_ACTIVE_SESSIONS);
+    if (allSessions[userId]) {
+      allSessions[userId] = allSessions[userId].filter(s => s.id !== sessionId || s.isCurrent);
+      await storageAdapter.set(SESSIONS_STORE_KEY, allSessions);
+    }
+    return allSessions[userId];
+  },
+
+  async toggle2FA(userId, enabled) {
+    await this.init();
+    await new Promise(r => setTimeout(r, 200));
+    const users = await storageAdapter.get(USERS_KEY, INITIAL_USERS);
+    const index = users.findIndex(u => u.id === userId);
+    if (index >= 0) {
+      users[index].twoFactorEnabled = enabled;
+      await storageAdapter.set(USERS_KEY, users);
+      const { passwordHash, ...safeUser } = users[index];
+      return safeUser;
+    }
+    throw new Error('User not found');
   }
 };

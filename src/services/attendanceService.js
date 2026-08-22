@@ -1,9 +1,10 @@
 import { storageAdapter } from './storage/storageAdapter';
-import { generateInitialAttendance } from '../data/mockData';
+import { generateInitialAttendance, INITIAL_USERS } from '../data/mockData';
 import { evaluateAttendanceStatus } from '../config/attendanceRules';
 
 const ATTENDANCE_HISTORY_KEY = 'attendance_records_';
 const TODAY_SESSION_KEY = 'attendance_today_session_';
+const USERS_KEY = 'users_db';
 
 const getTodayDateStr = () => {
   const now = new Date();
@@ -27,7 +28,6 @@ export const attendanceService = {
     let session = await storageAdapter.get(sessionKey);
     
     if (!session) {
-      // Check if today already has a completed record in history
       const history = await this.initUserAttendance(userId);
       const todayRecord = history.find(r => r.date === todayStr);
       if (todayRecord && todayRecord.checkIn) {
@@ -76,7 +76,6 @@ export const attendanceService = {
 
     await storageAdapter.set(sessionKey, newSession);
 
-    // Update or insert into history
     const historyKey = `${ATTENDANCE_HISTORY_KEY}${userId}`;
     const history = await this.initUserAttendance(userId);
     const existingIndex = history.findIndex(r => r.date === todayStr);
@@ -132,7 +131,6 @@ export const attendanceService = {
     };
     await storageAdapter.set(sessionKey, completedSession);
 
-    // Update history record
     const historyKey = `${ATTENDANCE_HISTORY_KEY}${userId}`;
     const history = await this.initUserAttendance(userId);
     const recordIndex = history.findIndex(r => r.date === todayStr);
@@ -164,16 +162,12 @@ export const attendanceService = {
   async getAttendanceHistory(userId, year, month) {
     const history = await this.initUserAttendance(userId);
     
-    // month is 1-indexed (1 to 12)
     const monthStr = month < 10 ? `0${month}` : `${month}`;
     const prefix = `${year}-${monthStr}`;
 
     const filtered = history.filter(r => r.date.startsWith(prefix));
-    
-    // Sort descending by date
     filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
 
-    // Compute monthly stats
     const presentCount = filtered.filter(r => r.status === 'Present').length;
     const lateCount = filtered.filter(r => r.status === 'Late').length;
     const absentCount = filtered.filter(r => r.status === 'Absent').length;
@@ -183,6 +177,58 @@ export const attendanceService = {
       records: filtered,
       stats: {
         totalDays: filtered.length,
+        present: presentCount,
+        late: lateCount,
+        absent: absentCount,
+        leaves: leaveCount
+      }
+    };
+  },
+
+  async getAllAttendanceRecords(year, month, filters = {}) {
+    const users = await storageAdapter.get(USERS_KEY, INITIAL_USERS);
+    const monthStr = month < 10 ? `0${month}` : `${month}`;
+    const prefix = `${year}-${monthStr}`;
+
+    let combinedRecords = [];
+
+    for (const u of users) {
+      const records = await this.initUserAttendance(u.id);
+      const userMonthRecords = records.filter(r => r.date.startsWith(prefix));
+      for (const r of userMonthRecords) {
+        combinedRecords.push({
+          ...r,
+          userName: u.name,
+          employeeId: u.employeeId,
+          userDepartment: u.department,
+          userAvatar: u.avatar
+        });
+      }
+    }
+
+    combinedRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+
+    if (filters.search && filters.search.trim()) {
+      const q = filters.search.trim().toLowerCase();
+      combinedRecords = combinedRecords.filter(r =>
+        r.userName?.toLowerCase().includes(q) ||
+        r.employeeId?.toLowerCase().includes(q)
+      );
+    }
+
+    if (filters.status && filters.status !== 'ALL') {
+      combinedRecords = combinedRecords.filter(r => r.status === filters.status);
+    }
+
+    const presentCount = combinedRecords.filter(r => r.status === 'Present').length;
+    const lateCount = combinedRecords.filter(r => r.status === 'Late').length;
+    const absentCount = combinedRecords.filter(r => r.status === 'Absent').length;
+    const leaveCount = combinedRecords.filter(r => r.status === 'On Leave' || r.status === 'Half Day').length;
+
+    return {
+      records: combinedRecords,
+      stats: {
+        totalDays: combinedRecords.length,
         present: presentCount,
         late: lateCount,
         absent: absentCount,
