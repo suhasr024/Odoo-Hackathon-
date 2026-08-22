@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useEmployees } from '../../hooks/useEmployees';
 import { useLeave } from '../../hooks/useLeave';
-import { useAttendance } from '../../hooks/useAttendance';
+import { useToast } from '../../hooks/useToast';
+import { authService } from '../../services/authService';
 import { leaveService } from '../../services/leaveService';
 import { formatDate } from '../../utils/dateUtils';
 import { Modal } from '../../components/common/Modal';
@@ -10,8 +11,9 @@ import { LoadingSkeleton } from '../../components/common/LoadingSkeleton';
 
 export const AdminDashboardPage = () => {
   const navigate = useNavigate();
-  const { employees, loading: empLoading } = useEmployees();
+  const { employees, fetchEmployees, loading: empLoading } = useEmployees();
   const { leaveRequests, loading: leaveLoading } = useLeave();
+  const { success, error: toastError } = useToast();
 
   const [allLeaves, setAllLeaves] = useState([]);
   const [loadingLeaves, setLoadingLeaves] = useState(true);
@@ -19,6 +21,10 @@ export const AdminDashboardPage = () => {
   const [rejectionReason, setRejectionReason] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [rejectError, setRejectError] = useState('');
+
+  // Pending Admin Signups
+  const [pendingAdmins, setPendingAdmins] = useState([]);
+  const [loadingAdmins, setLoadingAdmins] = useState(true);
 
   // Fetch all organization leave requests for admin
   const loadAllLeaves = async () => {
@@ -33,8 +39,21 @@ export const AdminDashboardPage = () => {
     }
   };
 
+  const loadPendingAdmins = async () => {
+    try {
+      setLoadingAdmins(true);
+      const data = await authService.getPendingAdminSignups();
+      setPendingAdmins(data);
+    } catch (err) {
+      console.error('Error loading pending admins:', err);
+    } finally {
+      setLoadingAdmins(false);
+    }
+  };
+
   useEffect(() => {
     loadAllLeaves();
+    loadPendingAdmins();
   }, [leaveRequests]);
 
   const pendingLeaves = useMemo(() => {
@@ -74,6 +93,35 @@ export const AdminDashboardPage = () => {
       await loadAllLeaves();
     } catch (err) {
       setRejectError(err.message || 'Failed to reject request.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Approve pending admin account
+  const handleApproveAdmin = async (pendingId, name) => {
+    try {
+      setIsProcessing(true);
+      await authService.approveAdminSignup(pendingId);
+      success(`Admin access approved for ${name}.`);
+      await loadPendingAdmins();
+      if (fetchEmployees) fetchEmployees();
+    } catch (err) {
+      toastError(err.message || 'Failed to approve admin request.');
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
+  // Reject pending admin account
+  const handleRejectAdmin = async (pendingId, name) => {
+    try {
+      setIsProcessing(true);
+      await authService.rejectAdminSignup(pendingId);
+      success(`Admin request rejected for ${name}.`);
+      await loadPendingAdmins();
+    } catch (err) {
+      toastError('Failed to reject request.');
     } finally {
       setIsProcessing(false);
     }
@@ -119,7 +167,7 @@ export const AdminDashboardPage = () => {
             </div>
           </div>
           <div>
-            <div className="text-3xl font-black text-amber-800">{pendingLeaves.length}</div>
+            <div className="text-3xl font-black text-amber-800">{pendingLeaves.length + pendingAdmins.length}</div>
             <div className="text-xs text-on-surface-variant mt-1 flex items-center gap-1">
               <span>Awaiting Admin Action</span>
               <span className="material-symbols-outlined text-[14px]">arrow_forward</span>
@@ -168,6 +216,52 @@ export const AdminDashboardPage = () => {
           </div>
         </div>
       </div>
+
+      {/* Pending Admin Registrations Notice Banner (if any) */}
+      {pendingAdmins.length > 0 && (
+        <div className="bg-surface-container-lowest rounded-2xl shadow-level-1 border-2 border-secondary/30 p-6">
+          <div className="flex justify-between items-center mb-4 pb-2 border-b border-surface-container">
+            <div className="flex items-center gap-2">
+              <span className="material-symbols-outlined text-secondary">admin_panel_settings</span>
+              <h3 className="text-base font-bold text-primary">Pending HR / Admin Account Approvals</h3>
+            </div>
+            <span className="text-xs bg-secondary-fixed text-primary px-2.5 py-0.5 rounded-full font-bold">
+              {pendingAdmins.length} Request(s)
+            </span>
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            {pendingAdmins.map((adm) => (
+              <div key={adm.id} className="p-4 rounded-xl bg-surface-container-low border border-surface-variant flex justify-between items-center gap-4">
+                <div className="flex items-center gap-3">
+                  <img src={adm.avatar} alt={adm.name} className="w-10 h-10 rounded-full object-cover shrink-0" />
+                  <div>
+                    <p className="text-xs font-bold text-primary">{adm.name}</p>
+                    <p className="text-[11px] text-on-surface-variant">{adm.email}</p>
+                    <p className="text-[10px] text-secondary font-medium">Requested: {adm.requestedDate} • {adm.employeeId}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0">
+                  <button
+                    onClick={() => handleRejectAdmin(adm.id, adm.name)}
+                    disabled={isProcessing}
+                    className="px-3 py-1.5 rounded-lg bg-error-container/50 text-error hover:bg-error-container text-xs font-semibold transition-colors"
+                  >
+                    Reject
+                  </button>
+                  <button
+                    onClick={() => handleApproveAdmin(adm.id, adm.name)}
+                    disabled={isProcessing}
+                    className="px-3 py-1.5 rounded-lg bg-secondary text-white hover:bg-secondary-container hover:text-on-secondary-container text-xs font-semibold transition-colors shadow-sm"
+                  >
+                    Approve Admin
+                  </button>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       {/* Main Grid: Employee Status Directory + Pending Approvals */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">

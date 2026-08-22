@@ -6,6 +6,7 @@ import { useToast } from '../../hooks/useToast';
 import { documentService } from '../../services/documentService';
 import { Modal } from '../../components/common/Modal';
 import { LoadingSkeleton } from '../../components/common/LoadingSkeleton';
+import { PasswordInput } from '../../components/common/PasswordInput';
 
 export const ProfilePage = () => {
   const { user, updateProfile, changePassword, loading } = useAuth();
@@ -582,8 +583,7 @@ export const ProfilePage = () => {
             <label className="block font-bold text-on-surface-variant uppercase tracking-wider mb-1">
               Current Password
             </label>
-            <input
-              type="password"
+            <PasswordInput
               required
               value={currentPassword}
               onChange={(e) => setCurrentPassword(e.target.value)}
@@ -596,8 +596,7 @@ export const ProfilePage = () => {
             <label className="block font-bold text-on-surface-variant uppercase tracking-wider mb-1">
               New Password
             </label>
-            <input
-              type="password"
+            <PasswordInput
               required
               value={newPassword}
               onChange={(e) => setNewPassword(e.target.value)}
@@ -610,8 +609,7 @@ export const ProfilePage = () => {
             <label className="block font-bold text-on-surface-variant uppercase tracking-wider mb-1">
               Confirm New Password
             </label>
-            <input
-              type="password"
+            <PasswordInput
               required
               value={confirmPassword}
               onChange={(e) => setConfirmPassword(e.target.value)}

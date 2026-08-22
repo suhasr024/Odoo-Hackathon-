@@ -1,10 +1,11 @@
 import { storageAdapter } from './storage/storageAdapter';
-import { INITIAL_USERS, INITIAL_ACTIVE_SESSIONS } from '../data/mockData';
+import { INITIAL_USERS, INITIAL_ACTIVE_SESSIONS, INITIAL_LEAVE_BALANCES } from '../data/mockData';
 
 const SESSION_KEY = 'auth_session';
 const USERS_KEY = 'users_db';
 const SESSIONS_STORE_KEY = 'active_sessions_store';
 const PENDING_SIGNUPS_KEY = 'pending_signups_db';
+const BALANCES_KEY = 'leave_balances_db';
 
 export const authService = {
   async init() {
@@ -75,8 +76,11 @@ export const authService = {
     await this.init();
     await new Promise(r => setTimeout(r, 250));
 
-    const { employeeId, email, password, role = 'Employee' } = payload;
+    const { name, employeeId, email, password, role = 'Employee' } = payload;
 
+    if (!name || !name.trim()) {
+      throw new Error('Please enter your full name.');
+    }
     if (!email || !email.includes('@')) {
       throw new Error('Please enter a valid email address.');
     }
@@ -93,22 +97,142 @@ export const authService = {
       throw new Error('An account with this email address already exists.');
     }
 
+    const trimmedName = name.trim();
+    const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(trimmedName)}&background=0ea5e9&color=fff&bold=true`;
+    const genEmpId = employeeId?.trim() || `EMP-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    if (role === 'Employee') {
+      // 1. Create real, active employee record directly in users_db
+      const newUserId = `usr_emp_${Date.now()}`;
+      const newEmployee = {
+        id: newUserId,
+        employeeId: genEmpId,
+        name: trimmedName,
+        email: email.trim(),
+        role: 'Employee',
+        designation: 'Associate Specialist',
+        department: 'People & Operations',
+        phone: '',
+        emergencyContact: '',
+        address: '',
+        bio: 'Team member at Vantage Technologies.',
+        joinDate: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+        status: 'Active',
+        avatar: fallbackAvatar,
+        passwordHash: password,
+        salary: {
+          basicPay: 45000,
+          hra: 12000,
+          otherAllowances: 3000,
+          taxDeduction: 4500,
+          otherDeductions: 1200,
+          payPeriod: 'August 2026',
+          history: []
+        }
+      };
+
+      users.push(newEmployee);
+      await storageAdapter.set(USERS_KEY, users);
+
+      // Initialize leave balances for new employee
+      let balances = await storageAdapter.get(BALANCES_KEY, INITIAL_LEAVE_BALANCES);
+      balances[newUserId] = {
+        annual: { total: 20, used: 0, available: 20 },
+        sick: { total: 10, used: 0, available: 10 },
+        unpaid: { total: 30, used: 0, available: 30 }
+      };
+      await storageAdapter.set(BALANCES_KEY, balances);
+
+      return {
+        type: 'emailVerificationPending',
+        email: email.trim(),
+        user: newEmployee
+      };
+    } else {
+      // 2. Admin role: write to pending_signups_db for approval
+      let pendings = await storageAdapter.get(PENDING_SIGNUPS_KEY, []);
+      const newPending = {
+        id: `pending_${Date.now()}`,
+        name: trimmedName,
+        employeeId: genEmpId,
+        email: email.trim(),
+        passwordHash: password,
+        role: 'Admin',
+        status: 'PENDING_APPROVAL',
+        requestedDate: new Date().toISOString().split('T')[0],
+        avatar: fallbackAvatar
+      };
+      pendings.push(newPending);
+      await storageAdapter.set(PENDING_SIGNUPS_KEY, pendings);
+
+      return {
+        type: 'adminApprovalPending',
+        email: email.trim()
+      };
+    }
+  },
+
+  async getPendingAdminSignups() {
+    await this.init();
+    const pendings = await storageAdapter.get(PENDING_SIGNUPS_KEY, []);
+    return pendings.filter(p => p.status === 'PENDING_APPROVAL');
+  },
+
+  async approveAdminSignup(pendingId) {
+    await this.init();
+    await new Promise(r => setTimeout(r, 200));
+
     let pendings = await storageAdapter.get(PENDING_SIGNUPS_KEY, []);
-    pendings.push({
-      id: `pending_${Date.now()}`,
-      employeeId: employeeId?.trim() || `EMP-${Date.now()}`,
-      email: email.trim(),
-      passwordHash: password,
-      role: role,
-      status: role === 'Admin' ? 'PENDING_APPROVAL' : 'PENDING_VERIFICATION',
-      createdAt: new Date().toISOString()
-    });
+    const pendingItem = pendings.find(p => p.id === pendingId);
+    if (!pendingItem) throw new Error('Pending request not found');
+
+    const users = await storageAdapter.get(USERS_KEY, INITIAL_USERS);
+    const newAdminUser = {
+      id: `usr_adm_${Date.now()}`,
+      employeeId: pendingItem.employeeId,
+      name: pendingItem.name,
+      email: pendingItem.email,
+      role: 'Admin',
+      designation: 'Operations Administrator',
+      department: 'Executive Operations',
+      phone: '',
+      emergencyContact: '',
+      address: '',
+      bio: 'Administrator account created via portal signup.',
+      joinDate: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+      status: 'Active',
+      avatar: pendingItem.avatar,
+      passwordHash: pendingItem.passwordHash,
+      twoFactorEnabled: false,
+      salary: {
+        basicPay: 75000,
+        hra: 18000,
+        otherAllowances: 6000,
+        taxDeduction: 9000,
+        otherDeductions: 2000,
+        payPeriod: 'August 2026',
+        history: []
+      }
+    };
+
+    users.push(newAdminUser);
+    await storageAdapter.set(USERS_KEY, users);
+
+    // Remove from pending
+    pendings = pendings.filter(p => p.id !== pendingId);
     await storageAdapter.set(PENDING_SIGNUPS_KEY, pendings);
 
-    return {
-      type: role === 'Admin' ? 'adminApprovalPending' : 'emailVerificationPending',
-      email: email.trim()
-    };
+    return newAdminUser;
+  },
+
+  async rejectAdminSignup(pendingId) {
+    await this.init();
+    await new Promise(r => setTimeout(r, 200));
+
+    let pendings = await storageAdapter.get(PENDING_SIGNUPS_KEY, []);
+    pendings = pendings.filter(p => p.id !== pendingId);
+    await storageAdapter.set(PENDING_SIGNUPS_KEY, pendings);
+    return true;
   },
 
   async resendVerification(email) {

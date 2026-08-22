@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../../hooks/useAuth';
 import { useToast } from '../../hooks/useToast';
+import { PasswordInput } from '../../components/common/PasswordInput';
 
 export const LoginPage = () => {
   const { login } = useAuth();
@@ -88,8 +89,7 @@ export const LoginPage = () => {
             <label className="block font-bold text-on-surface-variant uppercase tracking-wider mb-1">
               Password
             </label>
-            <input
-              type="password"
+            <PasswordInput
               required
               value={password}
               onChange={(e) => setPassword(e.target.value)}

@@ -2,12 +2,14 @@ import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { authService } from '../../services/authService';
 import { useToast } from '../../hooks/useToast';
+import { PasswordInput } from '../../components/common/PasswordInput';
 
 export const SignupPage = () => {
   const navigate = useNavigate();
   const { success, error: toastError } = useToast();
 
   const [formData, setFormData] = useState({
+    name: '',
     employeeId: '',
     email: '',
     password: '',
@@ -21,6 +23,11 @@ export const SignupPage = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError('');
+
+    if (!formData.name.trim()) {
+      setError('Please enter your full name.');
+      return;
+    }
 
     if (formData.password !== formData.confirmPassword) {
       setError('Password and confirm password do not match.');
@@ -76,6 +83,22 @@ export const SignupPage = () => {
             )}
 
             <form onSubmit={handleSubmit} className="space-y-4 text-xs">
+              {/* Full Name */}
+              <div>
+                <label className="block font-bold text-on-surface-variant uppercase tracking-wider mb-1">
+                  Full Name <span className="text-error">*</span>
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={formData.name}
+                  onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                  placeholder="e.g. Alex Morgan"
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-surface-variant bg-white text-primary outline-none focus:border-secondary"
+                />
+              </div>
+
+              {/* Employee ID */}
               <div>
                 <label className="block font-bold text-on-surface-variant uppercase tracking-wider mb-1">
                   Employee ID
@@ -89,6 +112,7 @@ export const SignupPage = () => {
                 />
               </div>
 
+              {/* Work Email */}
               <div>
                 <label className="block font-bold text-on-surface-variant uppercase tracking-wider mb-1">
                   Work Email <span className="text-error">*</span>
@@ -103,6 +127,7 @@ export const SignupPage = () => {
                 />
               </div>
 
+              {/* Role */}
               <div>
                 <label className="block font-bold text-on-surface-variant uppercase tracking-wider mb-1">
                   Account Role <span className="text-error">*</span>
@@ -117,17 +142,17 @@ export const SignupPage = () => {
                 </select>
               </div>
 
+              {/* Passwords with PasswordInput Toggle */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <div>
                   <label className="block font-bold text-on-surface-variant uppercase tracking-wider mb-1">
                     Password <span className="text-error">*</span>
                   </label>
-                  <input
-                    type="password"
+                  <PasswordInput
                     required
                     value={formData.password}
                     onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    placeholder="Min 8 chars, 1 number"
+                    placeholder="Min 8 chars"
                     className="w-full px-3.5 py-2.5 rounded-xl border border-surface-variant bg-white text-primary outline-none focus:border-secondary"
                   />
                 </div>
@@ -136,8 +161,7 @@ export const SignupPage = () => {
                   <label className="block font-bold text-on-surface-variant uppercase tracking-wider mb-1">
                     Confirm Password <span className="text-error">*</span>
                   </label>
-                  <input
-                    type="password"
+                  <PasswordInput
                     required
                     value={formData.confirmPassword}
                     onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
@@ -171,7 +195,7 @@ export const SignupPage = () => {
             </div>
             <h2 className="text-xl font-bold text-primary">Account Created!</h2>
             <p className="text-xs text-on-surface-variant leading-relaxed">
-              Please check your email (<strong>{formData.email}</strong>) to verify your address before logging in to Vantage Employee Suite.
+              Welcome, <strong>{formData.name}</strong>! Your account has been initialized. Please check your email (<strong>{formData.email}</strong>) to verify your address, or sign in directly to your Vantage Employee Suite.
             </p>
             <div className="pt-2">
               <button
@@ -196,7 +220,7 @@ export const SignupPage = () => {
             </div>
             <h2 className="text-xl font-bold text-primary">Request Submitted</h2>
             <p className="text-xs text-on-surface-variant leading-relaxed">
-              Your administrative account request has been submitted for approval. You will receive an email once an administrator confirms your access credentials.
+              Your administrative account request for <strong>{formData.name}</strong> ({formData.email}) has been submitted for approval. You will receive access once an administrator approves your request in the Admin Control Center.
             </p>
             <button
               onClick={() => navigate('/login')}
