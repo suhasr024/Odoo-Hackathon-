@@ -12,6 +12,31 @@ const getTodayDateStr = () => {
   return now.toISOString().split('T')[0];
 };
 
+export const getAttendanceSortTimestamp = (r) => {
+  if (r.checkIn) {
+    const t = new Date(r.checkIn).getTime();
+    if (!isNaN(t)) return t;
+  }
+  if (r.checkOut) {
+    const t = new Date(r.checkOut).getTime();
+    if (!isNaN(t)) return t;
+  }
+  if (r.date) {
+    const t = new Date(r.date + 'T00:00:00').getTime();
+    if (!isNaN(t)) return t;
+  }
+  return 0;
+};
+
+export const sortAttendanceRecordsNewestFirst = (records) => {
+  return [...records].sort((a, b) => {
+    const timeA = getAttendanceSortTimestamp(a);
+    const timeB = getAttendanceSortTimestamp(b);
+    if (timeB !== timeA) return timeB - timeA;
+    return (b.id || '').localeCompare(a.id || '');
+  });
+};
+
 export const attendanceService = {
   async initUserAttendance(userId) {
     const key = `${ATTENDANCE_HISTORY_KEY}${userId}`;
@@ -176,7 +201,6 @@ export const attendanceService = {
 
       if (existingIndex >= 0) {
         const existing = history[existingIndex];
-        // Guard check: If employee already logged checkIn, preserve timestamps and mark as 'Half Day'
         if (existing.checkIn) {
           history[existingIndex] = {
             ...existing,
@@ -204,7 +228,7 @@ export const attendanceService = {
       }
     }
 
-    history.sort((a, b) => new Date(b.date) - new Date(a.date));
+    history.sort((a, b) => getAttendanceSortTimestamp(b) - getAttendanceSortTimestamp(a));
     await storageAdapter.set(historyKey, history);
     return history;
   },
@@ -216,17 +240,17 @@ export const attendanceService = {
     const prefix = `${year}-${monthStr}`;
 
     const filtered = history.filter(r => r.date.startsWith(prefix));
-    filtered.sort((a, b) => new Date(b.date) - new Date(a.date));
+    const sorted = sortAttendanceRecordsNewestFirst(filtered);
 
-    const presentCount = filtered.filter(r => r.status === 'Present').length;
-    const lateCount = filtered.filter(r => r.status === 'Late').length;
-    const absentCount = filtered.filter(r => r.status === 'Absent').length;
-    const leaveCount = filtered.filter(r => r.status === 'On Leave' || r.status === 'Half Day').length;
+    const presentCount = sorted.filter(r => r.status === 'Present').length;
+    const lateCount = sorted.filter(r => r.status === 'Late').length;
+    const absentCount = sorted.filter(r => r.status === 'Absent').length;
+    const leaveCount = sorted.filter(r => r.status === 'On Leave' || r.status === 'Half Day').length;
 
     return {
-      records: filtered,
+      records: sorted,
       stats: {
-        totalDays: filtered.length,
+        totalDays: sorted.length,
         present: presentCount,
         late: lateCount,
         absent: absentCount,
@@ -256,7 +280,8 @@ export const attendanceService = {
       }
     }
 
-    combinedRecords.sort((a, b) => new Date(b.date) - new Date(a.date));
+    // Sort newest actual event timestamp first
+    combinedRecords = sortAttendanceRecordsNewestFirst(combinedRecords);
 
     if (filters.search && filters.search.trim()) {
       const q = filters.search.trim().toLowerCase();

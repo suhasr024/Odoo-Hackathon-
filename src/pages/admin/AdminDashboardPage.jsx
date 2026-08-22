@@ -5,6 +5,7 @@ import { useLeave } from '../../hooks/useLeave';
 import { useToast } from '../../hooks/useToast';
 import { authService } from '../../services/authService';
 import { leaveService } from '../../services/leaveService';
+import { attendanceService } from '../../services/attendanceService';
 import { formatDate } from '../../utils/dateUtils';
 import { Modal } from '../../components/common/Modal';
 import { LoadingSkeleton } from '../../components/common/LoadingSkeleton';
@@ -25,6 +26,9 @@ export const AdminDashboardPage = () => {
   // Pending Admin Signups
   const [pendingAdmins, setPendingAdmins] = useState([]);
   const [loadingAdmins, setLoadingAdmins] = useState(true);
+
+  // Today's attendance mapped by userId for activity-based overview
+  const [todayAttendanceMap, setTodayAttendanceMap] = useState({});
 
   // Fetch all organization leave requests for admin
   const loadAllLeaves = async () => {
@@ -51,9 +55,27 @@ export const AdminDashboardPage = () => {
     }
   };
 
+  const loadTodayAttendance = async () => {
+    try {
+      const now = new Date();
+      const todayStr = now.toISOString().split('T')[0];
+      const data = await attendanceService.getAllAttendanceRecords(now.getFullYear(), now.getMonth() + 1);
+      const map = {};
+      data.records.forEach(r => {
+        if (r.date === todayStr && !map[r.userId]) {
+          map[r.userId] = r;
+        }
+      });
+      setTodayAttendanceMap(map);
+    } catch (err) {
+      console.error('Error loading today attendance for dashboard:', err);
+    }
+  };
+
   useEffect(() => {
     loadAllLeaves();
     loadPendingAdmins();
+    loadTodayAttendance();
   }, [leaveRequests]);
 
   const pendingLeaves = useMemo(() => {
@@ -65,11 +87,38 @@ export const AdminDashboardPage = () => {
     return Array.from(set);
   }, [employees]);
 
+  // Employee status list ordered by latest attendance activity today first
+  const activityOrderedEmployees = useMemo(() => {
+    if (!employees || employees.length === 0) return [];
+
+    return [...employees].sort((a, b) => {
+      const recA = todayAttendanceMap[a.id];
+      const recB = todayAttendanceMap[b.id];
+
+      const timeA = recA?.checkIn ? new Date(recA.checkIn).getTime() : 0;
+      const timeB = recB?.checkIn ? new Date(recB.checkIn).getTime() : 0;
+
+      // 1. If both have checkIn today, most recent checkIn comes first
+      if (timeA > 0 && timeB > 0) {
+        if (timeB !== timeA) return timeB - timeA;
+      }
+      // 2. If only one has checkIn today, that employee comes first
+      if (timeA > 0 && timeB === 0) return -1;
+      if (timeB > 0 && timeA === 0) return 1;
+
+      // 3. Fallback: Active status first, then deterministic alphabetical
+      if (a.status === 'Active' && b.status !== 'Active') return -1;
+      if (b.status === 'Active' && a.status !== 'Active') return 1;
+      return (a.name || '').localeCompare(b.name || '');
+    });
+  }, [employees, todayAttendanceMap]);
+
   const handleApprove = async (requestId) => {
     try {
       setIsProcessing(true);
       await leaveService.approveLeaveRequest(requestId);
       await loadAllLeaves();
+      await loadTodayAttendance();
     } catch (err) {
       console.error(err);
     } finally {
@@ -265,13 +314,13 @@ export const AdminDashboardPage = () => {
 
       {/* Main Grid: Employee Status Directory + Pending Approvals */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-        {/* Employee Quick Status Directory (Spans 2 cols) */}
+        {/* Employee Quick Status Directory (Spans 2 cols) - Activity Ordered */}
         <div className="lg:col-span-2 bg-surface-container-lowest rounded-2xl shadow-level-1 border border-outline-variant p-6 flex flex-col justify-between">
           <div>
             <div className="flex justify-between items-center mb-4">
               <div>
                 <h3 className="text-lg font-bold text-primary">Employee Status Overview</h3>
-                <p className="text-xs text-on-surface-variant">Latest synchronized employee records</p>
+                <p className="text-xs text-on-surface-variant">Latest synchronized employee records & attendance</p>
               </div>
               <button
                 onClick={() => navigate('/admin/employees')}
@@ -293,38 +342,45 @@ export const AdminDashboardPage = () => {
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-surface-variant text-sm">
-                  {employees.slice(0, 5).map((emp) => (
-                    <tr
-                      key={emp.id}
-                      onClick={() => navigate('/admin/employees')}
-                      className="hover:bg-surface-container-low/60 transition-colors cursor-pointer"
-                    >
-                      <td className="py-3">
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={emp.avatar}
-                            alt={emp.name}
-                            className="w-8 h-8 rounded-full object-cover bg-surface-container shrink-0"
-                          />
-                          <div>
-                            <span className="font-semibold text-primary block leading-tight">{emp.name}</span>
-                            <span className="text-[10px] text-outline">{emp.employeeId}</span>
+                  {activityOrderedEmployees.slice(0, 5).map((emp) => {
+                    const todayRec = todayAttendanceMap[emp.id];
+                    const isCheckedInToday = Boolean(todayRec && todayRec.checkIn);
+
+                    return (
+                      <tr
+                        key={emp.id}
+                        onClick={() => navigate('/admin/employees')}
+                        className="hover:bg-surface-container-low/60 transition-colors cursor-pointer"
+                      >
+                        <td className="py-3">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={emp.avatar}
+                              alt={emp.name}
+                              className="w-8 h-8 rounded-full object-cover bg-surface-container shrink-0"
+                            />
+                            <div>
+                              <span className="font-semibold text-primary block leading-tight">{emp.name}</span>
+                              <span className="text-[10px] text-outline">{emp.employeeId}</span>
+                            </div>
                           </div>
-                        </div>
-                      </td>
-                      <td className="py-3 text-xs text-on-surface-variant">{emp.department}</td>
-                      <td className="py-3 text-xs text-on-surface-variant hidden sm:table-cell">{emp.designation}</td>
-                      <td className="py-3">
-                        <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                          emp.status === 'Active'
-                            ? 'bg-tertiary-fixed/20 text-on-tertiary-container'
-                            : 'bg-surface-variant text-on-surface-variant'
-                        }`}>
-                          {emp.status}
-                        </span>
-                      </td>
-                    </tr>
-                  ))}
+                        </td>
+                        <td className="py-3 text-xs text-on-surface-variant">{emp.department}</td>
+                        <td className="py-3 text-xs text-on-surface-variant hidden sm:table-cell">{emp.designation}</td>
+                        <td className="py-3">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                            isCheckedInToday
+                              ? 'bg-tertiary-fixed/20 text-on-tertiary-container'
+                              : emp.status === 'Active'
+                              ? 'bg-surface-container-high text-primary'
+                              : 'bg-surface-variant text-on-surface-variant'
+                          }`}>
+                            {isCheckedInToday ? (todayRec.status || 'Present') : emp.status}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
                 </tbody>
               </table>
             </div>

@@ -97,15 +97,16 @@ export const authService = {
       throw new Error('An account with this email address already exists.');
     }
 
+    const now = new Date();
     const trimmedName = name.trim();
     const fallbackAvatar = `https://ui-avatars.com/api/?name=${encodeURIComponent(trimmedName)}&background=0ea5e9&color=fff&bold=true`;
-    const genEmpId = employeeId?.trim() || `EMP-${new Date().getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
+    const genEmpId = employeeId?.trim() || `EMP-${now.getFullYear()}-${Math.floor(1000 + Math.random() * 9000)}`;
     const userDept = department?.trim() || 'Engineering';
     const userDesig = designation?.trim() || 'Software Engineer';
 
     if (role === 'Employee') {
       // 1. Create real, active employee record directly in users_db
-      const newUserId = `usr_emp_${Date.now()}`;
+      const newUserId = `usr_emp_${now.getTime()}`;
       const newEmployee = {
         id: newUserId,
         employeeId: genEmpId,
@@ -118,7 +119,7 @@ export const authService = {
         emergencyContact: '',
         address: '',
         bio: `${userDesig} in ${userDept} at Vantage Technologies.`,
-        joinDate: new Date().toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
+        joinDate: now.toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }),
         status: 'Active',
         avatar: fallbackAvatar,
         passwordHash: password,
@@ -154,7 +155,7 @@ export const authService = {
       // 2. Admin role: write to pending_signups_db for approval
       let pendings = await storageAdapter.get(PENDING_SIGNUPS_KEY, []);
       const newPending = {
-        id: `pending_${Date.now()}`,
+        id: `pending_${now.getTime()}`,
         name: trimmedName,
         employeeId: genEmpId,
         department: userDept,
@@ -163,10 +164,11 @@ export const authService = {
         passwordHash: password,
         role: 'Admin',
         status: 'PENDING_APPROVAL',
-        requestedDate: new Date().toISOString().split('T')[0],
+        requestedDate: now.toISOString().split('T')[0],
+        requestedAt: now.toISOString(),
         avatar: fallbackAvatar
       };
-      pendings.push(newPending);
+      pendings.unshift(newPending);
       await storageAdapter.set(PENDING_SIGNUPS_KEY, pendings);
 
       return {
@@ -179,7 +181,14 @@ export const authService = {
   async getPendingAdminSignups() {
     await this.init();
     const pendings = await storageAdapter.get(PENDING_SIGNUPS_KEY, []);
-    return pendings.filter(p => p.status === 'PENDING_APPROVAL');
+    const filtered = pendings.filter(p => p.status === 'PENDING_APPROVAL');
+    filtered.sort((a, b) => {
+      const timeA = a.requestedAt ? new Date(a.requestedAt).getTime() : (a.id ? Number(a.id.replace('pending_', '')) : 0);
+      const timeB = b.requestedAt ? new Date(b.requestedAt).getTime() : (b.id ? Number(b.id.replace('pending_', '')) : 0);
+      if (timeB !== timeA) return timeB - timeA;
+      return (b.id || '').localeCompare(a.id || '');
+    });
+    return filtered;
   },
 
   async approveAdminSignup(pendingId) {

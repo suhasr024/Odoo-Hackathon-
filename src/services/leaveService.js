@@ -8,6 +8,31 @@ const LEAVE_REQUESTS_KEY = 'leave_requests_db';
 const LEAVE_BALANCES_KEY = 'leave_balances_db';
 const USERS_KEY = 'users_db';
 
+export const getLeaveSortTimestamp = (r) => {
+  if (r.appliedAt) {
+    const t = new Date(r.appliedAt).getTime();
+    if (!isNaN(t)) return t;
+  }
+  if (r.appliedDate) {
+    const t = new Date(r.appliedDate + 'T00:00:00').getTime();
+    if (!isNaN(t)) return t;
+  }
+  if (r.startDate) {
+    const t = new Date(r.startDate + 'T00:00:00').getTime();
+    if (!isNaN(t)) return t;
+  }
+  return 0;
+};
+
+export const sortLeaveRequestsNewestFirst = (requests) => {
+  return [...requests].sort((a, b) => {
+    const timeA = getLeaveSortTimestamp(a);
+    const timeB = getLeaveSortTimestamp(b);
+    if (timeB !== timeA) return timeB - timeA;
+    return (b.id || '').localeCompare(a.id || '');
+  });
+};
+
 export const leaveService = {
   async init() {
     let requests = await storageAdapter.get(LEAVE_REQUESTS_KEY);
@@ -34,15 +59,13 @@ export const leaveService = {
     await this.init();
     const allRequests = await storageAdapter.get(LEAVE_REQUESTS_KEY, INITIAL_LEAVE_REQUESTS);
     const userRequests = allRequests.filter(r => r.userId === userId);
-    userRequests.sort((a, b) => new Date(b.appliedDate || b.startDate) - new Date(a.appliedDate || a.startDate));
-    return userRequests;
+    return sortLeaveRequestsNewestFirst(userRequests);
   },
 
   async getAllLeaveRequests() {
     await this.init();
     const allRequests = await storageAdapter.get(LEAVE_REQUESTS_KEY, INITIAL_LEAVE_REQUESTS);
-    allRequests.sort((a, b) => new Date(b.appliedDate || b.startDate) - new Date(a.appliedDate || a.startDate));
-    return allRequests;
+    return sortLeaveRequestsNewestFirst(allRequests);
   },
 
   async applyForLeave(userId, payload) {
@@ -83,8 +106,9 @@ export const leaveService = {
     const users = await storageAdapter.get(USERS_KEY, INITIAL_USERS);
     const user = users.find(u => u.id === userId);
 
+    const now = new Date();
     const newRequest = {
-      id: `lr_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`,
+      id: `lr_${now.getTime()}_${Math.random().toString(36).substr(2, 6)}`,
       userId,
       userName: user ? user.name : 'Alex Rivers',
       userEmail: user ? user.email : 'employee@vantage.io',
@@ -98,12 +122,14 @@ export const leaveService = {
       attachmentName: attachmentName || null,
       attachmentUrl: attachmentUrl || null,
       status: 'Pending',
-      appliedDate: new Date().toISOString().split('T')[0],
+      appliedDate: now.toISOString().split('T')[0],
+      appliedAt: now.toISOString(),
       rejectionReason: null
     };
 
-    const allRequests = await storageAdapter.get(LEAVE_REQUESTS_KEY, INITIAL_LEAVE_REQUESTS);
+    let allRequests = await storageAdapter.get(LEAVE_REQUESTS_KEY, INITIAL_LEAVE_REQUESTS);
     allRequests.unshift(newRequest);
+    allRequests = sortLeaveRequestsNewestFirst(allRequests);
     await storageAdapter.set(LEAVE_REQUESTS_KEY, allRequests);
 
     // Notify admins of new leave application
@@ -125,7 +151,7 @@ export const leaveService = {
     await this.init();
     await new Promise(r => setTimeout(r, 200));
 
-    const allRequests = await storageAdapter.get(LEAVE_REQUESTS_KEY, INITIAL_LEAVE_REQUESTS);
+    let allRequests = await storageAdapter.get(LEAVE_REQUESTS_KEY, INITIAL_LEAVE_REQUESTS);
     const index = allRequests.findIndex(r => r.id === requestId);
 
     if (index === -1) {
@@ -133,7 +159,6 @@ export const leaveService = {
     }
 
     const request = allRequests[index];
-    // State machine check: only Pending can be approved
     if (request.status !== 'Pending') {
       throw new Error(`Cannot approve a request with status "${request.status}". Only Pending requests can be approved.`);
     }
@@ -171,6 +196,7 @@ export const leaveService = {
       approvedDate: new Date().toISOString().split('T')[0]
     };
 
+    allRequests = sortLeaveRequestsNewestFirst(allRequests);
     await storageAdapter.set(LEAVE_REQUESTS_KEY, allRequests);
 
     // Notify employee of approval
@@ -193,7 +219,7 @@ export const leaveService = {
       throw new Error('Rejection reason is required (minimum 5 characters).');
     }
 
-    const allRequests = await storageAdapter.get(LEAVE_REQUESTS_KEY, INITIAL_LEAVE_REQUESTS);
+    let allRequests = await storageAdapter.get(LEAVE_REQUESTS_KEY, INITIAL_LEAVE_REQUESTS);
     const index = allRequests.findIndex(r => r.id === requestId);
 
     if (index === -1) {
@@ -212,6 +238,7 @@ export const leaveService = {
       rejectedDate: new Date().toISOString().split('T')[0]
     };
 
+    allRequests = sortLeaveRequestsNewestFirst(allRequests);
     await storageAdapter.set(LEAVE_REQUESTS_KEY, allRequests);
 
     // Notify employee of rejection with reason
@@ -230,7 +257,7 @@ export const leaveService = {
     await this.init();
     await new Promise(r => setTimeout(r, 200));
 
-    const allRequests = await storageAdapter.get(LEAVE_REQUESTS_KEY, INITIAL_LEAVE_REQUESTS);
+    let allRequests = await storageAdapter.get(LEAVE_REQUESTS_KEY, INITIAL_LEAVE_REQUESTS);
     const index = allRequests.findIndex(r => r.id === requestId && r.userId === userId);
 
     if (index === -1) {
@@ -248,6 +275,7 @@ export const leaveService = {
       cancelledDate: new Date().toISOString().split('T')[0]
     };
 
+    allRequests = sortLeaveRequestsNewestFirst(allRequests);
     await storageAdapter.set(LEAVE_REQUESTS_KEY, allRequests);
     return allRequests[index];
   }
