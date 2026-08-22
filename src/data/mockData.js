@@ -309,7 +309,7 @@ export const INITIAL_SETTINGS = {
     portalTitle: 'Vantage Employee Suite',
     supportEmail: 'support@vantage.io',
     timezone: 'America/Los_Angeles (PST)',
-    currency: 'USD ($)',
+    currency: 'INR (₹)',
     fiscalYearStart: 'January 1'
   },
   attendance: {

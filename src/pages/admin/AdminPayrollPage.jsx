@@ -105,15 +105,15 @@ export const AdminPayrollPage = () => {
                     <td className="p-4 text-xs text-on-surface-variant">{emp.department}</td>
                     <td className="p-4 text-xs font-bold text-primary">
                       {emp.basicPay > 0 ? (
-                        `$${emp.basicPay.toLocaleString()}`
+                        `₹${emp.basicPay.toLocaleString()}`
                       ) : (
                         <span className="text-outline italic">Not set</span>
                       )}
                     </td>
-                    <td className="p-4 text-xs text-on-surface-variant">+${totalAllowances.toLocaleString()}</td>
-                    <td className="p-4 text-xs text-error">-${totalDeductions.toLocaleString()}</td>
-                    <td className="p-4 text-xs font-semibold text-primary">${emp.grossSalary.toLocaleString()}</td>
-                    <td className="p-4 text-xs font-bold text-secondary">${emp.netSalary.toLocaleString()}</td>
+                    <td className="p-4 text-xs text-on-surface-variant">+₹{totalAllowances.toLocaleString()}</td>
+                    <td className="p-4 text-xs text-error">-₹{totalDeductions.toLocaleString()}</td>
+                    <td className="p-4 text-xs font-semibold text-primary">₹{emp.grossSalary.toLocaleString()}</td>
+                    <td className="p-4 text-xs font-bold text-secondary">₹{emp.netSalary.toLocaleString()}</td>
                     <td className="p-4 text-right">
                       <button
                         onClick={() => handleOpenEdit(emp)}
@@ -151,7 +151,7 @@ export const AdminPayrollPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label className="block font-bold text-on-surface-variant uppercase tracking-wider mb-1">
-                  Basic Pay ($) <span className="text-error">*</span>
+                  Basic Pay (₹) <span className="text-error">*</span>
                 </label>
                 <input
                   type="number"
@@ -165,7 +165,7 @@ export const AdminPayrollPage = () => {
 
               <div>
                 <label className="block font-bold text-on-surface-variant uppercase tracking-wider mb-1">
-                  House Rent Allowance (HRA) ($)
+                  House Rent Allowance (HRA) (₹)
                 </label>
                 <input
                   type="number"
@@ -180,7 +180,7 @@ export const AdminPayrollPage = () => {
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               <div>
                 <label className="block font-bold text-on-surface-variant uppercase tracking-wider mb-1">
-                  Other Allowances ($)
+                  Other Allowances (₹)
                 </label>
                 <input
                   type="number"
@@ -193,7 +193,7 @@ export const AdminPayrollPage = () => {
 
               <div>
                 <label className="block font-bold text-on-surface-variant uppercase tracking-wider mb-1">
-                  Tax Deduction ($)
+                  Tax Deduction (₹)
                 </label>
                 <input
                   type="number"
@@ -206,7 +206,7 @@ export const AdminPayrollPage = () => {
 
               <div>
                 <label className="block font-bold text-on-surface-variant uppercase tracking-wider mb-1">
-                  Other Deductions ($)
+                  Other Deductions (₹)
                 </label>
                 <input
                   type="number"
@@ -222,11 +222,11 @@ export const AdminPayrollPage = () => {
             <div className="p-4 rounded-xl bg-surface-container-high border border-surface-variant flex justify-between items-center">
               <div>
                 <span className="text-[10px] uppercase font-bold text-on-surface-variant">Live Computed Gross</span>
-                <p className="text-base font-bold text-primary">${liveGross.toLocaleString()}</p>
+                <p className="text-base font-bold text-primary">₹{liveGross.toLocaleString()}</p>
               </div>
               <div className="text-right">
                 <span className="text-[10px] uppercase font-bold text-secondary">Live Computed Net</span>
-                <p className="text-lg font-black text-secondary">${liveNet.toLocaleString()}</p>
+                <p className="text-lg font-black text-secondary">₹{liveNet.toLocaleString()}</p>
               </div>
             </div>
 

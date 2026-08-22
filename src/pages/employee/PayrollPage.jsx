@@ -36,14 +36,14 @@ export const PayrollPage = () => {
               Net Monthly Disbursed Pay
             </span>
             <div className="text-4xl md:text-5xl font-black text-primary tracking-tight">
-              ${salary.netSalary.toLocaleString()}
+              ₹{salary.netSalary.toLocaleString()}
             </div>
             <div className="flex items-center gap-2 mt-2">
               <span className="text-xs font-semibold text-secondary-container bg-secondary/10 px-2.5 py-0.5 rounded-full">
                 Pay Period: {salary.payPeriod}
               </span>
               <span className="text-xs text-on-surface-variant font-medium">
-                Gross: ${salary.grossSalary.toLocaleString()}
+                Gross: ₹{salary.grossSalary.toLocaleString()}
               </span>
             </div>
           </div>
@@ -70,27 +70,27 @@ export const PayrollPage = () => {
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 mt-6">
           <div className="p-4 rounded-xl bg-surface-container-low border border-surface-variant">
             <span className="text-[10px] uppercase font-bold text-outline tracking-wider block">Basic Pay</span>
-            <span className="text-lg font-bold text-primary block mt-1">${salary.basicPay.toLocaleString()}</span>
+            <span className="text-lg font-bold text-primary block mt-1">₹{salary.basicPay.toLocaleString()}</span>
           </div>
 
           <div className="p-4 rounded-xl bg-surface-container-low border border-surface-variant">
             <span className="text-[10px] uppercase font-bold text-outline tracking-wider block">HRA (Housing)</span>
-            <span className="text-lg font-bold text-primary block mt-1">${salary.hra.toLocaleString()}</span>
+            <span className="text-lg font-bold text-primary block mt-1">₹{salary.hra.toLocaleString()}</span>
           </div>
 
           <div className="p-4 rounded-xl bg-surface-container-low border border-surface-variant">
             <span className="text-[10px] uppercase font-bold text-outline tracking-wider block">Other Allowances</span>
-            <span className="text-lg font-bold text-primary block mt-1">${salary.otherAllowances.toLocaleString()}</span>
+            <span className="text-lg font-bold text-primary block mt-1">₹{salary.otherAllowances.toLocaleString()}</span>
           </div>
 
           <div className="p-4 rounded-xl bg-error-container/20 border border-error-container/40">
             <span className="text-[10px] uppercase font-bold text-error tracking-wider block">Tax Deduction</span>
-            <span className="text-lg font-bold text-error block mt-1">-${salary.taxDeduction.toLocaleString()}</span>
+            <span className="text-lg font-bold text-error block mt-1">-₹{salary.taxDeduction.toLocaleString()}</span>
           </div>
 
           <div className="p-4 rounded-xl bg-error-container/20 border border-error-container/40">
             <span className="text-[10px] uppercase font-bold text-error tracking-wider block">Other Deductions</span>
-            <span className="text-lg font-bold text-error block mt-1">-${salary.otherDeductions.toLocaleString()}</span>
+            <span className="text-lg font-bold text-error block mt-1">-₹{salary.otherDeductions.toLocaleString()}</span>
           </div>
         </div>
       </div>
@@ -129,7 +129,7 @@ export const PayrollPage = () => {
                 <tr key={row.id} className="hover:bg-surface-container-low/50 transition-colors">
                   <td className="p-4 font-bold text-primary">{row.period}</td>
                   <td className="p-4 font-mono text-xs text-on-surface-variant">{row.id}</td>
-                  <td className="p-4 font-bold text-primary">${row.netAmount.toLocaleString()}</td>
+                  <td className="p-4 font-bold text-primary">₹{row.netAmount.toLocaleString()}</td>
                   <td className="p-4">
                     <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-tertiary-fixed/20 text-on-tertiary-container">
                       {row.status}

@@ -143,19 +143,19 @@ Designation:       ${employee.designation}
 Payment Status:    Paid (Direct Deposit)
 ------------------------------------------------------------
 EARNINGS:
-  Basic Salary:                 $${Number(salaryData.basicPay).toLocaleString()}
-  House Rent Allowance (HRA):   $${Number(salaryData.hra).toLocaleString()}
-  Other Allowances:             $${Number(salaryData.otherAllowances).toLocaleString()}
+  Basic Salary:                 ₹${Number(salaryData.basicPay).toLocaleString()}
+  House Rent Allowance (HRA):   ₹${Number(salaryData.hra).toLocaleString()}
+  Other Allowances:             ₹${Number(salaryData.otherAllowances).toLocaleString()}
 ------------------------------------------------------------
-  TOTAL GROSS SALARY:           $${Number(gross).toLocaleString()}
+  TOTAL GROSS SALARY:           ₹${Number(gross).toLocaleString()}
 ------------------------------------------------------------
 DEDUCTIONS:
-  Income Tax (TDS / Federal):   $${Number(salaryData.taxDeduction).toLocaleString()}
-  Other Deductions (Benefits):  $${Number(salaryData.otherDeductions).toLocaleString()}
+  Income Tax (TDS / Federal):   ₹${Number(salaryData.taxDeduction).toLocaleString()}
+  Other Deductions (Benefits):  ₹${Number(salaryData.otherDeductions).toLocaleString()}
 ------------------------------------------------------------
-  TOTAL DEDUCTIONS:             $${Number(salaryData.taxDeduction + salaryData.otherDeductions).toLocaleString()}
+  TOTAL DEDUCTIONS:             ₹${Number(salaryData.taxDeduction + salaryData.otherDeductions).toLocaleString()}
 ============================================================
-  NET DISBURSED AMOUNT:         $${Number(net).toLocaleString()}
+  NET DISBURSED AMOUNT:         ₹${Number(net).toLocaleString()}
 ============================================================
 Generated via Vantage Employee Suite HRMS Portal.
 This is a computer-generated document and requires no signature.

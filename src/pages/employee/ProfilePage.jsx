@@ -529,7 +529,7 @@ export const ProfilePage = () => {
                 Current Monthly Disbursed Compensation
               </span>
               <div className="text-4xl font-black text-primary mt-1">
-                ${salary ? salary.netSalary.toLocaleString() : '54,300'}
+                ₹{salary ? salary.netSalary.toLocaleString() : '54,300'}
               </div>
               <p className="text-xs text-secondary font-medium mt-1">
                 Pay Period: {salary?.payPeriod || 'August 2026'}
@@ -546,19 +546,19 @@ export const ProfilePage = () => {
           <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 pt-4 border-t border-surface-container text-xs">
             <div className="p-3 bg-surface-container-low rounded-xl">
               <span className="text-outline uppercase font-semibold block">Basic Pay</span>
-              <span className="text-sm font-bold text-primary mt-0.5 block">${salary?.basicPay.toLocaleString()}</span>
+              <span className="text-sm font-bold text-primary mt-0.5 block">₹{salary?.basicPay.toLocaleString()}</span>
             </div>
             <div className="p-3 bg-surface-container-low rounded-xl">
               <span className="text-outline uppercase font-semibold block">HRA</span>
-              <span className="text-sm font-bold text-primary mt-0.5 block">${salary?.hra.toLocaleString()}</span>
+              <span className="text-sm font-bold text-primary mt-0.5 block">₹{salary?.hra.toLocaleString()}</span>
             </div>
             <div className="p-3 bg-surface-container-low rounded-xl">
               <span className="text-outline uppercase font-semibold block">Allowances</span>
-              <span className="text-sm font-bold text-primary mt-0.5 block">${salary?.otherAllowances.toLocaleString()}</span>
+              <span className="text-sm font-bold text-primary mt-0.5 block">₹{salary?.otherAllowances.toLocaleString()}</span>
             </div>
             <div className="p-3 bg-surface-container-low rounded-xl">
               <span className="text-outline uppercase font-semibold block">Deductions</span>
-              <span className="text-sm font-bold text-error mt-0.5 block">-${((salary?.taxDeduction || 0) + (salary?.otherDeductions || 0)).toLocaleString()}</span>
+              <span className="text-sm font-bold text-error mt-0.5 block">-₹{((salary?.taxDeduction || 0) + (salary?.otherDeductions || 0)).toLocaleString()}</span>
             </div>
           </div>
         </div>

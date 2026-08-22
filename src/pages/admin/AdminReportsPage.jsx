@@ -272,8 +272,8 @@ export const AdminReportsPage = () => {
                     <tr key={emp.userId} className="hover:bg-surface-container-low/50">
                       <td className="p-3 font-bold text-primary">{emp.name} ({emp.employeeId})</td>
                       <td className="p-3 text-on-surface-variant">{emp.department}</td>
-                      <td className="p-3 font-semibold text-primary">${emp.grossSalary.toLocaleString()}</td>
-                      <td className="p-3 font-bold text-secondary">${emp.netSalary.toLocaleString()}</td>
+                      <td className="p-3 font-semibold text-primary">₹{emp.grossSalary.toLocaleString()}</td>
+                      <td className="p-3 font-bold text-secondary">₹{emp.netSalary.toLocaleString()}</td>
                       <td className="p-3 text-right">
                         <button
                           onClick={() => setSelectedSlipEmployee(emp)}
@@ -321,27 +321,27 @@ export const AdminReportsPage = () => {
             <div className="space-y-2">
               <div className="flex justify-between py-1 border-b border-surface-container">
                 <span className="text-on-surface-variant">Basic Salary:</span>
-                <span className="font-bold text-primary">${selectedSlipEmployee.basicPay.toLocaleString()}</span>
+                <span className="font-bold text-primary">₹{selectedSlipEmployee.basicPay.toLocaleString()}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-surface-container">
                 <span className="text-on-surface-variant">House Rent Allowance (HRA):</span>
-                <span className="font-bold text-primary">${selectedSlipEmployee.hra.toLocaleString()}</span>
+                <span className="font-bold text-primary">₹{selectedSlipEmployee.hra.toLocaleString()}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-surface-container">
                 <span className="text-on-surface-variant">Other Allowances:</span>
-                <span className="font-bold text-primary">${selectedSlipEmployee.otherAllowances.toLocaleString()}</span>
+                <span className="font-bold text-primary">₹{selectedSlipEmployee.otherAllowances.toLocaleString()}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-surface-container">
                 <span className="text-error font-medium">Income Tax (TDS):</span>
-                <span className="font-bold text-error">-${selectedSlipEmployee.taxDeduction.toLocaleString()}</span>
+                <span className="font-bold text-error">-₹{selectedSlipEmployee.taxDeduction.toLocaleString()}</span>
               </div>
               <div className="flex justify-between py-1 border-b border-surface-container">
                 <span className="text-error font-medium">Other Deductions:</span>
-                <span className="font-bold text-error">-${selectedSlipEmployee.otherDeductions.toLocaleString()}</span>
+                <span className="font-bold text-error">-₹{selectedSlipEmployee.otherDeductions.toLocaleString()}</span>
               </div>
               <div className="flex justify-between pt-2 text-sm font-black border-t-2 border-surface-container">
                 <span className="text-primary">Net Disbursed Pay:</span>
-                <span className="text-secondary">${selectedSlipEmployee.netSalary.toLocaleString()}</span>
+                <span className="text-secondary">₹{selectedSlipEmployee.netSalary.toLocaleString()}</span>
               </div>
             </div>
 
