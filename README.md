@@ -1,123 +1,125 @@
-# Vantage — Employee Management System
+# Vantage HRMS
 
 *Every workday, perfectly aligned.*
 
-Vantage is a full-featured Human Resource Management System (HRMS) built for two distinct user roles — **Employees** and **Admin/HR** — covering authentication, attendance tracking, leave management, payroll visibility, and reporting in a single, unified portal.
+Vantage is a complete Human Resource Management System designed around two dedicated experiences — one for **Employees** and one for **Admin/HR** — bringing authentication, attendance, leave management, payroll, and reporting together under a single portal.
 
 ---
 
-## 🚀 Overview
+## 🚀 What It Does
 
-Vantage digitizes core HR operations so companies can move away from spreadsheets and manual approvals:
+Vantage replaces manual, spreadsheet-driven HR processes with a digital workflow that handles:
 
-- Secure sign up / sign in with role-based access
-- Real-time attendance tracking (check-in / check-out)
-- End-to-end leave request and approval workflows
-- Employee and Admin payroll visibility
-- Centralized employee directory and management
-- Reporting & analytics for HR decision-making
-- In-app notifications for key events
-
----
-
-## 🏗️ Architecture
-
-Vantage follows a 4-tier decoupled frontend architecture, designed so a real backend (REST/GraphQL) can be dropped in later with minimal rework.
+- Role-based sign up and login
+- Live attendance tracking with check-in/check-out
+- Complete leave application and approval cycle
+- Payroll visibility for both employees and administrators
+- A centralized employee directory
+- HR analytics and reporting
+- In-app alerts for important updates
 
 ---
 
-## 🌟 Features
+## 🏗️ System Architecture
 
-### Employee Portal
-- **Dashboard** — daily attendance status, live check-in timer, leave balance overview, recent activity
-- **Attendance** — check-in/check-out, monthly attendance history with month/year navigation
-- **Leave Requests** — apply for leave with live balance calculation, track status (Pending/Approved/Rejected/Cancelled), cancel pending requests
-- **Payroll** — read-only salary breakdown, salary slip downloads, payment history
-- **Profile** — personal details, password management, document uploads
+The frontend is built as four independent, stacked layers, so a real backend can eventually be swapped in without rewriting the UI.
 
-### Admin Portal
-- **Overview** — company-wide metrics: total workforce, present today, pending approvals
-- **Employee Management** — searchable directory, add/edit employees, activate/deactivate accounts
-- **Attendance Overview** — enterprise-wide attendance tracking, filters, export
-- **Leave Management** — approve/reject requests with mandatory rejection reason, automatic balance & attendance sync
-- **Payroll Management** — view and edit employee salary structures, run payroll
-- **Reports & Analytics** — attendance and leave reports, exportable data
-- **Settings** — organization settings, attendance rules, leave policy defaults, notification preferences
-- **Profile** — personal details, password, 2FA, active session management
+---
+
+## 🌟 Core Modules
+
+### For Employees
+- **Dashboard** — today's attendance state, a running check-in timer, leave balances at a glance, and recent activity
+- **Attendance** — clock in/out, with a full history browsable by month and year
+- **Leave Requests** — submit a request with real-time balance checks, follow its status (Pending → Approved/Rejected/Cancelled), withdraw pending ones
+- **Payroll** — a read-only breakdown of salary, downloadable pay slips, and past payment records
+- **Profile** — manage personal info, update password, upload supporting documents
+
+### For Admin / HR
+- **Overview** — a snapshot of workforce size, who's present today, and requests awaiting approval
+- **Employee Management** — search the directory, add or edit employee records, toggle active/inactive status
+- **Attendance Overview** — company-wide attendance data with filtering and export
+- **Leave Management** — approve or reject requests (rejections require a reason), with balances and attendance records updating automatically
+- **Payroll Management** — review and adjust salary structures, process payroll runs
+- **Reports & Analytics** — pull attendance and leave data into exportable reports
+- **Settings** — configure company info, attendance rules, default leave allowances, and notification preferences
+- **Profile** — personal details, password and 2FA management, session control
 
 ### Security
-- Role-based route protection (`ProtectedRoute`, `RoleRoute`)
-- Session-based authentication — no client-side role switching
-- Admin routes strictly inaccessible to Employee accounts
+- Routes are gated by role (`ProtectedRoute`, `RoleRoute`)
+- Authentication relies on session state — there's no way to switch roles from the client
+- Employees are fully blocked from reaching any admin route
 
 ---
 
-## 🛠️ Tech Stack
+## 🛠️ Built With
 
 - **Frontend:** React + Vite
-- **State Management:** React Context + Custom Hooks
+- **State:** React Context and custom hooks
 - **Styling:** Tailwind CSS
-- **Storage (current):** Browser `localStorage` + `IndexedDB` (for file attachments)
-- **Storage (planned):** REST/GraphQL API backend — see Storage Adapter layer
+- **Storage today:** browser `localStorage`, plus `IndexedDB` for file attachments
+- **Storage next:** a real REST/GraphQL backend, slotting into the existing Storage Adapter layer
 
 ---
 
-## 📦 Getting Started
+## 📦 Running It Locally
 
-### Prerequisites
-- Node.js (v18 or higher recommended)
+### You'll need
+- Node.js 18+
 - npm or yarn
 
-### Installation
+### Setup
 
 ```bash
-# Clone the repository
+# Clone it
 git clone https://github.com/suhasr024/Odoo-Hackathon-.git
 cd Odoo-Hackathon-
 
-# Install dependencies
+# Install packages
 npm install
 
-# Start the development server
+# Run in dev mode
 npm run dev
 
 # Build for production
 npm run build
 ```
 
-The app will be available at `http://localhost:5173` (or the port shown in your terminal).
+Once running, open `http://localhost:5173` (or whatever port your terminal shows).
 
 ---
 
-## 👥 Demo Accounts
+## 👥 Try It With Demo Logins
 
-| Role | Email | Password | Access |
+| Role | Email | Password | Can Access |
 |---|---|---|---|
 | Employee | alex.morgan@vantage.io | DemoPassword123! | Dashboard, Attendance, Leave Requests, Payroll, Profile |
 | Admin | sarah.admin@vantage.io | AdminPassword123! | Overview, Employee Management, Attendance, Leave Requests, Payroll, Reports, Settings, Profile |
 
-Quick-login demo buttons are also available directly on the Login page.
+The Login page also has one-click demo buttons for both accounts.
 
 ---
 
-## 📁 Project Structure
+## 📁 How the Code Is Organized
 
 ---
 
-## 🗺️ Roadmap
+## 🗺️ What's Next
 
-- [ ] Backend API integration (replace localStorage adapter with real REST/GraphQL endpoints)
-- [ ] Real email verification and notification delivery
-- [ ] Manager / Super Admin role tiers
-- [ ] Advanced permissions system
-- [ ] Mobile-responsive sliding navigation drawer
+- [ ] Swap in a real backend (REST/GraphQL) behind the storage adapter
+- [ ] Send actual verification and notification emails
+- [ ] Introduce Manager / Super Admin tiers
+- [ ] Build out a fuller permissions system
+- [ ] Add a responsive sliding nav drawer for mobile
+
+---
+
 ## 📄 License
 
-This project was built as part of a hackathon submission. License to be determined.
+Submitted as a hackathon project — license not yet finalized.
 
 ---
 
-## 🙌 Acknowledgements
+## 🙌 Credits
 
-Built with the Vantage / Executive Zenith design system — Slate (`#1e293b`) and Electric Blue (`#0ea5e9`) on Inter typography.
-
+Styled with the Vantage / Executive Zenith design system: Slate (`#1e293b`) and Electric Blue (`#0ea5e9`), set in Inter.
