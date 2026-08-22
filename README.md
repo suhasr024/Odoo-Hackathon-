@@ -89,6 +89,18 @@ Once running, open `http://localhost:5173` (or whatever port your terminal shows
 
 ---
 
+## Deploying to Vercel
+
+1. Import this GitHub repository into Vercel.
+2. Keep the framework preset as **Vite**.
+3. Use `npm run vercel-build` as the build command.
+4. Use `dist` as the output directory.
+5. Deploy without adding environment variables; the current demo app uses browser storage and does not yet connect to Supabase.
+
+The included `vercel.json` handles client-side route refreshes for paths such as `/dashboard` and `/admin`.
+
+---
+
 ## 👥 Try It With Demo Logins
 
 | Role | Email | Password | Can Access |
