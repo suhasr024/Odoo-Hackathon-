@@ -111,9 +111,6 @@ Quick-login demo buttons are also available directly on the Login page.
 - [ ] Manager / Super Admin role tiers
 - [ ] Advanced permissions system
 - [ ] Mobile-responsive sliding navigation drawer
-
----
-
 ## 📄 License
 
 This project was built as part of a hackathon submission. License to be determined.
