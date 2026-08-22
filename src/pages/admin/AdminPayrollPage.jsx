@@ -19,11 +19,11 @@ export const AdminPayrollPage = () => {
   const handleOpenEdit = (emp) => {
     setEditingEmployee(emp);
     setEditForm({
-      basicPay: emp.basicPay || 0,
-      hra: emp.hra || 0,
-      otherAllowances: emp.otherAllowances || 0,
-      taxDeduction: emp.taxDeduction || 0,
-      otherDeductions: emp.otherDeductions || 0
+      basicPay: Number(emp.basicPay) || 0,
+      hra: Number(emp.hra) || 0,
+      otherAllowances: Number(emp.otherAllowances) || 0,
+      taxDeduction: Number(emp.taxDeduction) || 0,
+      otherDeductions: Number(emp.otherDeductions) || 0
     });
   };
 
@@ -158,7 +158,11 @@ export const AdminPayrollPage = () => {
                   min="0"
                   required
                   value={editForm.basicPay}
-                  onChange={(e) => setEditForm({ ...editForm, basicPay: Number(e.target.value) })}
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setEditForm({ ...editForm, basicPay: val === '' ? 0 : Number(val) });
+                  }}
                   className="w-full px-3.5 py-2 rounded-xl border border-surface-variant bg-white text-primary outline-none focus:border-secondary"
                 />
               </div>
@@ -171,7 +175,11 @@ export const AdminPayrollPage = () => {
                   type="number"
                   min="0"
                   value={editForm.hra}
-                  onChange={(e) => setEditForm({ ...editForm, hra: Number(e.target.value) })}
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setEditForm({ ...editForm, hra: val === '' ? 0 : Number(val) });
+                  }}
                   className="w-full px-3.5 py-2 rounded-xl border border-surface-variant bg-white text-primary outline-none focus:border-secondary"
                 />
               </div>
@@ -186,7 +194,11 @@ export const AdminPayrollPage = () => {
                   type="number"
                   min="0"
                   value={editForm.otherAllowances}
-                  onChange={(e) => setEditForm({ ...editForm, otherAllowances: Number(e.target.value) })}
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setEditForm({ ...editForm, otherAllowances: val === '' ? 0 : Number(val) });
+                  }}
                   className="w-full px-3.5 py-2 rounded-xl border border-surface-variant bg-white text-primary outline-none focus:border-secondary"
                 />
               </div>
@@ -199,7 +211,11 @@ export const AdminPayrollPage = () => {
                   type="number"
                   min="0"
                   value={editForm.taxDeduction}
-                  onChange={(e) => setEditForm({ ...editForm, taxDeduction: Number(e.target.value) })}
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setEditForm({ ...editForm, taxDeduction: val === '' ? 0 : Number(val) });
+                  }}
                   className="w-full px-3.5 py-2 rounded-xl border border-surface-variant bg-white text-primary outline-none focus:border-secondary"
                 />
               </div>
@@ -212,7 +228,11 @@ export const AdminPayrollPage = () => {
                   type="number"
                   min="0"
                   value={editForm.otherDeductions}
-                  onChange={(e) => setEditForm({ ...editForm, otherDeductions: Number(e.target.value) })}
+                  onFocus={(e) => e.target.select()}
+                  onChange={(e) => {
+                    const val = e.target.value;
+                    setEditForm({ ...editForm, otherDeductions: val === '' ? 0 : Number(val) });
+                  }}
                   className="w-full px-3.5 py-2 rounded-xl border border-surface-variant bg-white text-primary outline-none focus:border-secondary"
                 />
               </div>
